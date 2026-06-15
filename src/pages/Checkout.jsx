@@ -1,9 +1,18 @@
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { calculateTotals } from "../store/slices/cartSlice";
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Recalculate totals on mount since cart is loaded from localStorage
+  // but totals are initialized to 0 in Redux state
+  useEffect(() => {
+    dispatch(calculateTotals());
+  }, [dispatch]);
 
   const { cart = [], totalItems, totalPrice, gst, deliveryCharges, discount, finalPrice } = useSelector((state) => state.cart);
 

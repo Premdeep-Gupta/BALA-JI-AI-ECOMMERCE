@@ -22,17 +22,31 @@ const coupons = {
   WELCOME50: 50,
 };
 
+// Compute initial totals from persisted cart
+const computeInitialTotals = (cart) => {
+  let totalItems = 0;
+  let subtotal = 0;
+  cart.forEach((item) => {
+    totalItems += item.quantity;
+    subtotal += item.quantity * (item.product?.price || 0);
+  });
+  const totalPrice = Number(subtotal.toFixed(2));
+  const gst = Number((totalPrice * 0.18).toFixed(2));
+  const deliveryCharges = totalPrice > 999 || totalPrice === 0 ? 0 : 99;
+  const finalPrice = Number((totalPrice + gst + deliveryCharges).toFixed(2));
+  return { totalItems, totalPrice, gst, deliveryCharges, finalPrice };
+};
+
+const _initialCart = loadCart();
+const _initialTotals = computeInitialTotals(_initialCart);
+
 const cartSlice = createSlice({
   name: "cart",
   initialState: {
-    cart: loadCart(),
-    totalItems: 0,
-    totalPrice: 0,
+    cart: _initialCart,
     discount: 0,
-    gst: 0,
-    deliveryCharges: 0,
-    finalPrice: 0,
     appliedCoupon: null,
+    ..._initialTotals,
   },
 
   reducers: {
