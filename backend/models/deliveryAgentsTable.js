@@ -35,6 +35,7 @@ export async function createDeliveryAgentsTable() {
         unblock_requested_at TIMESTAMP DEFAULT NULL,
         unblock_window_expires_at TIMESTAMP DEFAULT NULL,
         documents JSONB DEFAULT NULL,
+        offline_count INT DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
@@ -44,7 +45,8 @@ export async function createDeliveryAgentsTable() {
       ADD COLUMN IF NOT EXISTS blocked_shift_slot VARCHAR(10),
       ADD COLUMN IF NOT EXISTS unblock_requested_at TIMESTAMP,
       ADD COLUMN IF NOT EXISTS unblock_window_expires_at TIMESTAMP,
-      ADD COLUMN IF NOT EXISTS documents JSONB DEFAULT NULL;
+      ADD COLUMN IF NOT EXISTS documents JSONB DEFAULT NULL,
+      ADD COLUMN IF NOT EXISTS offline_count INT DEFAULT 0;
     `);
     console.log("✅ Delivery Agents Table Created/Updated Successfully");
   } catch (error) {
