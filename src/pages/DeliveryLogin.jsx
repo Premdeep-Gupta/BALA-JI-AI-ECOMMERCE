@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Phone, Lock, Eye, EyeOff, ArrowRight, CheckCircle2, Camera, RefreshCw, Smartphone, Key } from "lucide-react";
+import { axiosInstance } from "../lib/axios";
 import axios from "axios";
 import { toast } from "react-toastify";
 import * as faceapi from "@vladmandic/face-api";
@@ -191,7 +192,7 @@ export default function DeliveryLogin() {
     await new Promise(r => setTimeout(r, 800));
 
     try {
-      const res = await axios.post("/api/v1/delivery/login", { phone, password });
+      const res = await axiosInstance.post("/delivery/login", { phone, password });
       
       if (res.data.success) {
         const partner = res.data.deliveryAgent;

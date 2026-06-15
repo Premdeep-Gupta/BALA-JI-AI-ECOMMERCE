@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { User, Phone, Truck, Shield, Lock, Eye, EyeOff, Upload, CheckCircle2, ArrowRight, ArrowLeft, Clock, MapPin, Mail, Calendar, Smartphone, Landmark, FileText, Camera, RefreshCw, ZoomIn, X as XIcon } from "lucide-react";
+import { axiosInstance } from "../lib/axios";
 import axios from "axios";
 import { toast } from "react-toastify";
 import * as faceapi from "@vladmandic/face-api";
@@ -791,7 +792,7 @@ export default function DeliveryRegister() {
 
     try {
       // ✅ Real Backend Registration with all documents & face embedding descriptor vector
-      const res = await axios.post("/api/v1/delivery/register", {
+      const res = await axiosInstance.post("/delivery/register", {
         name: formData.name,
         phone: formData.phone,
         email: formData.email,

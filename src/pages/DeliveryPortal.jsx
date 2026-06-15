@@ -7,6 +7,7 @@ import {
   Zap, BarChart3, AlertCircle, TrendingUp, Calendar, Star, ArrowUpRight, ArrowDownRight, Minus, IndianRupee, Activity,
   BookOpen, ChevronLeft, ChevronRight, Ban, CheckCheck, History, FileText
 } from "lucide-react";
+import { axiosInstance } from "../lib/axios";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { InvoiceTemplate } from "./InvoiceTemplate";
@@ -542,7 +543,7 @@ export default function DeliveryPortal() {
     setPickupModal(prev => ({ ...prev, submitting: true, error: "" }));
 
     try {
-      const res = await axios.put(`/api/v1/delivery/pickup/${pickupModal.order.id}`, {
+      const res = await axiosInstance.put(`/delivery/pickup/${pickupModal.order.id}`, {
         pickupImage: pickupModal.image,
         qcNotes: pickupModal.notes,
         action: pickupModal.action
@@ -595,7 +596,7 @@ export default function DeliveryPortal() {
     setSubmittingAppeal(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post("/api/v1/delivery/submit-unblock", {
+      const res = await axiosInstance.post("/delivery/submit-unblock", {
         reason: appealReason
       }, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
@@ -653,7 +654,7 @@ export default function DeliveryPortal() {
       // Fetch real status from PostgreSQL database via API
       let serverPartner = null;
       try {
-        const res = await axios.get("/api/v1/delivery/profile", {
+        const res = await axiosInstance.get("/delivery/profile", {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -724,7 +725,7 @@ export default function DeliveryPortal() {
       // ✅ If blocked — check if next shift started (auto-unblock) or update window info
       if (agentData.delivery_partner_status === "BLOCKED") {
         try {
-          const unblockRes = await axios.post("/api/v1/delivery/check-shift-unblock", {}, {
+          const unblockRes = await axiosInstance.post("/delivery/check-shift-unblock", {}, {
             headers: { Authorization: `Bearer ${token}` }
           });
           if (unblockRes.data.success && !unblockRes.data.stillBlocked) {
@@ -822,7 +823,7 @@ export default function DeliveryPortal() {
       // ✅ FIXED: Fetch real assigned orders from backend API (previously was only reading localStorage)
       let fetchedOrders = [];
       try {
-        const ordersRes = await axios.get("/api/v1/delivery/assigned-orders", {
+        const ordersRes = await axiosInstance.get("/delivery/assigned-orders", {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (ordersRes.data.success) {
@@ -920,7 +921,7 @@ export default function DeliveryPortal() {
     const sessionPhone = localStorage.getItem("delivery_session_phone");
     if (!token || !sessionPhone) return;
     try {
-      const ordersRes = await axios.get("/api/v1/delivery/assigned-orders", {
+      const ordersRes = await axiosInstance.get("/delivery/assigned-orders", {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (ordersRes.data.success) {
@@ -982,7 +983,7 @@ export default function DeliveryPortal() {
       const pref = `${slot.label} (${slot.time.replace('–', '-')})`;
       try {
         const token = localStorage.getItem('token');
-        axios.put('/api/v1/delivery/update-status', {
+        axiosInstance.put('/delivery/update-status', {
           is_online: agent.is_online,
           shift_preference: pref
         }, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
@@ -1024,7 +1025,7 @@ export default function DeliveryPortal() {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.post("/api/v1/delivery/auto-block", {
+      await axiosInstance.post("/delivery/auto-block", {
         reason: "Offline During Active Shift",
         offlineCount: offlineCountRef.current,
         blockedShiftSlot: activeSlot?.slot || null
@@ -1082,7 +1083,7 @@ export default function DeliveryPortal() {
     setShiftBookingsLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("/api/v1/delivery/my-bookings", {
+      const res = await axiosInstance.get("/delivery/my-bookings", {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) setDbShiftBookings(res.data.bookings || []);
@@ -1096,7 +1097,7 @@ export default function DeliveryPortal() {
   const bookShiftToDb = async (dateStr, slot) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.post("/api/v1/delivery/book-shift", {
+      await axiosInstance.post("/delivery/book-shift", {
         shift_date: dateStr,
         shift_slot: slot.id,
         shift_label: `${slot.label} (${slot.time})`,
@@ -1117,7 +1118,7 @@ export default function DeliveryPortal() {
     }
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`/api/v1/delivery/cancel-shift/${bookingId}`, {
+      await axiosInstance.delete(`/delivery/cancel-shift/${bookingId}`, {
         headers: { Authorization: `Bearer ${token}` },
         data: { reason: "Cancelled by agent" }
       });
@@ -1132,7 +1133,7 @@ export default function DeliveryPortal() {
     setFinesLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("/api/v1/delivery/my-fines", {
+      const res = await axiosInstance.get("/delivery/my-fines", {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
@@ -1468,7 +1469,7 @@ export default function DeliveryPortal() {
     }
 
     try {
-      const res = await axios.put("/api/v1/delivery/profile/update", {
+      const res = await axiosInstance.put("/delivery/profile/update", {
         name: profileEdit.name,
         vehicle_number: profileEdit.vehicle_number,
         agency: profileEdit.agency,
@@ -2089,7 +2090,7 @@ export default function DeliveryPortal() {
     if (agent && !agent.is_online) {
       try {
         const token = localStorage.getItem('token');
-        await axios.put('/api/v1/delivery/update-status', { is_online: true, shift_preference: agent.shift_preference }, {
+        await axiosInstance.put('/delivery/update-status', { is_online: true, shift_preference: agent.shift_preference }, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         setAgent(prev => ({ ...prev, is_online: true }));
@@ -2230,7 +2231,7 @@ export default function DeliveryPortal() {
       const logOfflineEventToBackend = async () => {
         try {
           const token = localStorage.getItem("token");
-          await axios.post("/api/v1/delivery/offline-event", {
+          await axiosInstance.post("/delivery/offline-event", {
             event_type: "Offline Event",
             offline_count: currentCount,
             details: `Offline event count ${currentCount}/5 during active shift preference: ${agent.shift_preference}`
@@ -2264,7 +2265,7 @@ export default function DeliveryPortal() {
       const logCountdownToBackend = async () => {
         try {
           const token = localStorage.getItem("token");
-          await axios.post("/api/v1/delivery/offline-event", {
+          await axiosInstance.post("/delivery/offline-event", {
             event_type: "Countdown Started",
             offline_count: currentCount,
             details: `Started 5-minute recovery countdown for offline event ${currentCount}/5.`
@@ -2380,7 +2381,7 @@ export default function DeliveryPortal() {
     const token = localStorage.getItem("token");
     
     try {
-      const res = await axios.put("/api/v1/delivery/update-status", {
+      const res = await axiosInstance.put("/delivery/update-status", {
         is_online: nextOnlineState,
         shift_preference: agent.shift_preference
       }, {
@@ -2408,7 +2409,7 @@ export default function DeliveryPortal() {
   const handleShiftChange = async (e) => {
     const val = e.target.value;
     try {
-      const res = await axios.put("/api/v1/delivery/update-status", {
+      const res = await axiosInstance.put("/delivery/update-status", {
         is_online: agent.is_online,
         shift_preference: val
       });
@@ -2424,7 +2425,7 @@ export default function DeliveryPortal() {
 
   const handleLogout = async () => {
     try {
-      const res = await axios.get("/api/v1/delivery/logout");
+      const res = await axiosInstance.get("/delivery/logout");
       if (res.data.success) {
         toast.success(res.data.message || "Logged out successfully.");
         Object.values(simIntervals.current).forEach(clearInterval);
@@ -2750,7 +2751,7 @@ export default function DeliveryPortal() {
     setOtpModal(prev => ({ ...prev, verifying: true, error: "" }));
 
     try {
-      const res = await axios.put(`/api/v1/delivery/deliver/${otpModal.orderId}`, {
+      const res = await axiosInstance.put(`/delivery/deliver/${otpModal.orderId}`, {
         otp: otpModal.otpValue
       });
 
@@ -2777,7 +2778,7 @@ export default function DeliveryPortal() {
 
     const updateLocationOnServer = async (position) => {
       try {
-        await axios.put("/api/v1/delivery/update-location", {
+        await axiosInstance.put("/delivery/update-location", {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
         });
@@ -3365,7 +3366,7 @@ export default function DeliveryPortal() {
     if (!silent) setHistoryLoading(true);
     setHistoryError(null);
     try {
-      const res = await axios.get("/api/v1/delivery/my-work-logs", {
+      const res = await axiosInstance.get("/delivery/my-work-logs", {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
