@@ -75,7 +75,7 @@ const Payment = () => {
 
   // Fetch saved addresses from DB on load
   useEffect(() => {
-    if (authUser?._id) {
+    if (authUser?.id || authUser?._id) {
       setAddressesLoading(true);
       axiosInstance.get("/auth/addresses")
         .then(({ data }) => {
@@ -90,7 +90,7 @@ const Payment = () => {
         .catch(err => console.error("Failed to load addresses:", err))
         .finally(() => setAddressesLoading(false));
     }
-  }, [authUser?._id]);
+  }, [authUser?.id, authUser?._id]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [step, setStep] = useState(1);
