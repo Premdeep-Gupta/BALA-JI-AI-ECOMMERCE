@@ -27,12 +27,12 @@ const HeroSlider = () => {
     },
     {
       id: 3,
-      title: "Home & Garden",
+      title: "Home",
       subtitle: "Transform your space",
       description: "Beautiful furniture and decor for every home",
       image: "./furniture.jpg",
       cta: "Shop Home",
-      url: `/products?category=Home & Garden`,
+      url: `/products?category=Home`,
     },
   ];
 

@@ -263,3 +263,488 @@
     animation: fadeInUp 0.6s ease-out;
   }
 }
+
+/* ============================================================
+   THEME VISIBILITY SYSTEM — All 3 Themes: wine / dark / light
+   ============================================================ */
+
+/* ---------- LIGHT THEME (Soft Rose / Flipkart-style) ---------- */
+.light {
+  color-scheme: light;
+}
+
+/* Text overrides */
+.light .text-white,
+.light h1.text-white,
+.light h2.text-white,
+.light h3.text-white,
+.light h4.text-white,
+.light h5.text-white,
+.light p.text-white,
+.light span.text-white,
+.light div.text-white {
+  color: #2d0a12 !important;
+}
+.light h1, .light h2, .light h3, .light h4, .light h5 {
+  color: #2d0a12 !important;
+}
+.light .text-slate-100 { color: #4a1020 !important; }
+.light .text-slate-200 { color: #5c1827 !important; }
+.light .text-slate-300, .light .text-slate-350 { color: #6b2133 !important; }
+.light .text-slate-400 { color: #7d2539 !important; }
+.light .text-slate-500 { color: #8f3245 !important; }
+.light .text-slate-600 { color: #a03e50 !important; }
+.light .text-gray-300, .light .text-gray-400 { color: #7d2539 !important; }
+.light .text-gray-500 { color: #8f3245 !important; }
+.light .opacity-60, .light .opacity-40 { opacity: 0.75 !important; }
+
+/* Background overrides */
+.light .bg-black\/35,
+.light .bg-black\/25,
+.light .bg-black\/10,
+.light .bg-black\/60,
+.light .bg-slate-900,
+.light .bg-slate-800,
+.light .bg-slate-950\/40,
+.light .bg-slate-950\/20 {
+  background-color: rgba(255, 235, 238, 0.7) !important;
+  color: #2d0a12 !important;
+}
+.light .bg-white\/5, .light .bg-white\/10 {
+  background-color: rgba(255, 255, 255, 0.65) !important;
+  border-color: rgba(225, 29, 72, 0.18) !important;
+  color: #2d0a12 !important;
+}
+.light .bg-white\/5 * { color: #2d0a12 !important; }
+
+/* Border overrides */
+.light .border-white\/5,
+.light .border-white\/10,
+.light .border-white\/20,
+.light .border-slate-700,
+.light .border-slate-800,
+.light .border-slate-850 {
+  border-color: rgba(225, 29, 72, 0.2) !important;
+}
+
+/* Input/form overrides */
+.light input,
+.light textarea,
+.light select {
+  color: #2d0a12 !important;
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(225, 29, 72, 0.25) !important;
+}
+.light input::placeholder,
+.light textarea::placeholder {
+  color: #a85f6e !important;
+}
+.light .bg-red-950\/20 {
+  background-color: rgba(225, 29, 72, 0.08) !important;
+}
+
+/* ---------- WINE THEME (Deep Luxury Red) — make text visible on dark bg ---------- */
+.wine .text-slate-400,
+.wine .text-slate-500,
+.wine .text-gray-400,
+.wine .text-gray-500 {
+  color: #ffc5d0 !important;
+}
+.wine .text-slate-200,
+.wine .text-slate-300 {
+  color: #ffe5ec !important;
+}
+.wine .text-slate-600,
+.wine .text-gray-600 {
+  color: #ffb3c0 !important;
+}
+.wine input,
+.wine textarea,
+.wine select {
+  color: #ffe5ec !important;
+  background-color: rgba(122, 31, 47, 0.15) !important;
+  border-color: rgba(122, 31, 47, 0.5) !important;
+}
+.wine input::placeholder,
+.wine textarea::placeholder {
+  color: rgba(255, 204, 213, 0.6) !important;
+}
+.wine .opacity-60 { opacity: 0.8 !important; }
+.wine .opacity-40 { opacity: 0.7 !important; }
+
+/* ---------- DARK THEME (Dark Red / Pure Dark) — make text visible ---------- */
+.dark .text-slate-400,
+.dark .text-gray-400 {
+  color: #fca5b4 !important;
+}
+.dark .text-slate-300,
+.dark .text-gray-300 {
+  color: #fce7f3 !important;
+}
+.dark .text-slate-500,
+.dark .text-gray-500 {
+  color: #f472b6 !important;
+}
+.dark .text-slate-600,
+.dark .text-gray-600 {
+  color: #fb7185 !important;
+}
+.dark input,
+.dark textarea,
+.dark select {
+  color: #fce7f3 !important;
+  background-color: rgba(159, 18, 57, 0.12) !important;
+  border-color: rgba(159, 18, 57, 0.4) !important;
+}
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: rgba(251, 113, 133, 0.5) !important;
+}
+.dark .opacity-60 { opacity: 0.8 !important; }
+.dark .opacity-40 { opacity: 0.7 !important; }
+
+/* ---------- Override for inputs inside white modals/panels under any theme (e.g. LoginModal) ---------- */
+.bg-white input,
+.wine .bg-white input,
+.dark .bg-white input,
+.light .bg-white input,
+.bg-white textarea,
+.wine .bg-white textarea,
+.dark .bg-white textarea,
+.light .bg-white textarea,
+.bg-white select,
+.wine .bg-white select,
+.dark .bg-white select,
+.light .bg-white select {
+  color: #1e293b !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+.bg-white input::placeholder,
+.wine .bg-white input::placeholder,
+.dark .bg-white input::placeholder,
+.light .bg-white input::placeholder,
+.bg-white textarea::placeholder,
+.wine .bg-white textarea::placeholder,
+.dark .bg-white textarea::placeholder,
+.light .bg-white textarea::placeholder {
+  color: #94a3b8 !important;
+}
+.bg-white div.bg-slate-50,
+.wine .bg-white div.bg-slate-50,
+.dark .bg-white div.bg-slate-50,
+.light .bg-white div.bg-slate-50 {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* ---------- Shared: Admin-style tables & badges in all themes ---------- */
+.light .bg-indigo-950\/40 {
+  background-color: rgba(79, 70, 229, 0.12) !important;
+}
+.light .text-indigo-300, .light .text-indigo-400 {
+  color: #4338ca !important;
+}
+.light .border-indigo-500\/20, .light .border-indigo-500\/30 {
+  border-color: rgba(79, 70, 229, 0.3) !important;
+}
+
+/* Custom Laser Animation for Barcode Scanning Viewfinder */
+@keyframes scannerLaser {
+  0% {
+    top: 0%;
+  }
+  50% {
+    top: 100%;
+  }
+  100% {
+    top: 0%;
+  }
+}
+
+.animate-scannerLaser {
+  animation: scannerLaser 2.2s infinite linear;
+}
+
+/* ==========================================================================
+   DELIVERY PORTAL COLOR RESETS (Convert Pink/Rose tones to White/Slate)
+   ========================================================================== */
+
+/* Overrides for text-slate and text-gray colors in dark & wine themes */
+.delivery-portal-view.dark .text-slate-400,
+.delivery-portal-view.dark .text-gray-400,
+.delivery-portal-view.dark .text-slate-500,
+.delivery-portal-view.dark .text-gray-500,
+.delivery-portal-view.dark .text-slate-300,
+.delivery-portal-view.dark .text-gray-300,
+.delivery-portal-view.dark .text-slate-600,
+.delivery-portal-view.dark .text-gray-600,
+.delivery-portal-view.wine .text-slate-400,
+.delivery-portal-view.wine .text-gray-400,
+.delivery-portal-view.wine .text-slate-500,
+.delivery-portal-view.wine .text-gray-500,
+.delivery-portal-view.wine .text-slate-300,
+.delivery-portal-view.wine .text-gray-300,
+.delivery-portal-view.wine .text-slate-600,
+.delivery-portal-view.wine .text-gray-600,
+.dark .delivery-portal-view .text-slate-400,
+.dark .delivery-portal-view .text-gray-400,
+.dark .delivery-portal-view .text-slate-500,
+.dark .delivery-portal-view .text-gray-500,
+.dark .delivery-portal-view .text-slate-300,
+.dark .delivery-portal-view .text-gray-300,
+.dark .delivery-portal-view .text-slate-600,
+.dark .delivery-portal-view .text-gray-600,
+.wine .delivery-portal-view .text-slate-400,
+.wine .delivery-portal-view .text-gray-400,
+.wine .delivery-portal-view .text-slate-500,
+.wine .delivery-portal-view .text-gray-500,
+.wine .delivery-portal-view .text-slate-300,
+.wine .delivery-portal-view .text-gray-300,
+.wine .delivery-portal-view .text-slate-600,
+.wine .delivery-portal-view .text-gray-600 {
+  color: #cbd5e1 !important; /* light slate gray (off-white) */
+}
+
+/* Force high-visibility text-white and text-slate-100/200 to stay pure white */
+.delivery-portal-view.dark .text-slate-200,
+.delivery-portal-view.dark .text-slate-100,
+.delivery-portal-view.wine .text-slate-200,
+.delivery-portal-view.wine .text-slate-100,
+.dark .delivery-portal-view .text-slate-200,
+.dark .delivery-portal-view .text-slate-100,
+.wine .delivery-portal-view .text-slate-200,
+.wine .delivery-portal-view .text-slate-100 {
+  color: #ffffff !important;
+}
+
+/* Overrides for text-rose classes inside the delivery portal */
+.delivery-portal-view .text-rose-450,
+.delivery-portal-view .text-rose-400,
+.delivery-portal-view .text-rose-350,
+.delivery-portal-view .text-rose-300,
+.delivery-portal-view .text-rose-500,
+.delivery-portal-view .text-rose-600,
+.delivery-portal-view .text-rose-700,
+.delivery-portal-view .text-rose-800 {
+  color: #ffffff !important;
+}
+
+/* Overrides for text-pink classes inside the delivery portal */
+.delivery-portal-view .text-pink-400,
+.delivery-portal-view .text-pink-500,
+.delivery-portal-view .text-pink-600 {
+  color: #ffffff !important;
+}
+
+/* Overrides for solid rose backgrounds in indicator bars */
+.delivery-portal-view .bg-rose-500 {
+  background-color: #94a3b8 !important; /* slate-400 */
+}
+
+/* ==========================================================================
+   ADMIN PORTAL COLOR RESETS (Convert Pink/Red themes to White/Slate)
+   ========================================================================== */
+
+/* Force clean slate/off-white text inside the admin dashboard under all themes */
+.admin-portal-view.light .text-slate-400,
+.admin-portal-view.light .text-gray-400,
+.admin-portal-view.light .text-slate-505,
+.admin-portal-view.light .text-slate-500,
+.admin-portal-view.light .text-gray-500,
+.admin-portal-view.light .text-slate-300,
+.admin-portal-view.light .text-gray-300,
+.admin-portal-view.light .text-slate-350,
+.admin-portal-view.light .text-slate-600,
+.admin-portal-view.light .text-gray-600,
+.admin-portal-view.dark .text-slate-400,
+.admin-portal-view.dark .text-gray-400,
+.admin-portal-view.dark .text-slate-505,
+.admin-portal-view.dark .text-slate-500,
+.admin-portal-view.dark .text-gray-500,
+.admin-portal-view.dark .text-slate-300,
+.admin-portal-view.dark .text-gray-300,
+.admin-portal-view.dark .text-slate-350,
+.admin-portal-view.dark .text-slate-600,
+.admin-portal-view.dark .text-gray-600,
+.admin-portal-view.wine .text-slate-400,
+.admin-portal-view.wine .text-gray-400,
+.admin-portal-view.wine .text-slate-505,
+.admin-portal-view.wine .text-slate-500,
+.admin-portal-view.wine .text-gray-500,
+.admin-portal-view.wine .text-slate-300,
+.admin-portal-view.wine .text-gray-300,
+.admin-portal-view.wine .text-slate-350,
+.admin-portal-view.wine .text-slate-600,
+.admin-portal-view.wine .text-gray-600,
+.light .admin-portal-view .text-slate-400,
+.light .admin-portal-view .text-gray-400,
+.light .admin-portal-view .text-slate-505,
+.light .admin-portal-view .text-slate-500,
+.light .admin-portal-view .text-gray-500,
+.light .admin-portal-view .text-slate-300,
+.light .admin-portal-view .text-gray-300,
+.light .admin-portal-view .text-slate-350,
+.light .admin-portal-view .text-slate-600,
+.light .admin-portal-view .text-gray-600,
+.dark .admin-portal-view .text-slate-400,
+.dark .admin-portal-view .text-gray-400,
+.dark .admin-portal-view .text-slate-505,
+.dark .admin-portal-view .text-slate-500,
+.dark .admin-portal-view .text-gray-500,
+.dark .admin-portal-view .text-slate-300,
+.dark .admin-portal-view .text-gray-300,
+.dark .admin-portal-view .text-slate-350,
+.dark .admin-portal-view .text-slate-600,
+.dark .admin-portal-view .text-gray-600,
+.wine .admin-portal-view .text-slate-400,
+.wine .admin-portal-view .text-gray-400,
+.wine .admin-portal-view .text-slate-505,
+.wine .admin-portal-view .text-slate-500,
+.wine .admin-portal-view .text-gray-500,
+.wine .admin-portal-view .text-slate-300,
+.wine .admin-portal-view .text-gray-300,
+.wine .admin-portal-view .text-slate-350,
+.wine .admin-portal-view .text-slate-600,
+.wine .admin-portal-view .text-gray-600 {
+  color: #cbd5e1 !important; /* off-white slate text */
+}
+
+/* Force headers, headings, and white texts to stay pure white (#ffffff) instead of dark red/pink */
+.admin-portal-view.light .text-white,
+.admin-portal-view.light h1,
+.admin-portal-view.light h2,
+.admin-portal-view.light h3,
+.admin-portal-view.light h4,
+.admin-portal-view.light h5,
+.admin-portal-view.light span.text-white,
+.admin-portal-view.light div.text-white,
+.admin-portal-view.light p.text-white,
+.admin-portal-view.wine .text-white,
+.admin-portal-view.wine h1,
+.admin-portal-view.wine h2,
+.admin-portal-view.wine h3,
+.admin-portal-view.wine h4,
+.admin-portal-view.wine h5,
+.admin-portal-view.wine span.text-white,
+.admin-portal-view.wine div.text-white,
+.admin-portal-view.wine p.text-white,
+.light .admin-portal-view .text-white,
+.light .admin-portal-view h1,
+.light .admin-portal-view h2,
+.light .admin-portal-view h3,
+.light .admin-portal-view h4,
+.light .admin-portal-view h5,
+.light .admin-portal-view span.text-white,
+.light .admin-portal-view div.text-white,
+.light .admin-portal-view p.text-white,
+.wine .admin-portal-view .text-white,
+.wine .admin-portal-view h1,
+.wine .admin-portal-view h2,
+.wine .admin-portal-view h3,
+.wine .admin-portal-view h4,
+.wine .admin-portal-view h5,
+.wine .admin-portal-view span.text-white,
+.wine .admin-portal-view div.text-white,
+.wine .admin-portal-view p.text-white {
+  color: #ffffff !important;
+}
+
+/* Ensure clean white text for secondary slate levels (text-slate-100/200/350) */
+.admin-portal-view.light .text-slate-200,
+.admin-portal-view.light .text-slate-100,
+.admin-portal-view.wine .text-slate-200,
+.admin-portal-view.wine .text-slate-100,
+.light .admin-portal-view .text-slate-200,
+.light .admin-portal-view .text-slate-100,
+.wine .admin-portal-view .text-slate-200,
+.wine .admin-portal-view .text-slate-100 {
+  color: #ffffff !important;
+}
+
+/* Force dark theme backgrounds and layout colors for the admin dashboard */
+.admin-portal-view,
+.light .admin-portal-view,
+.wine .admin-portal-view,
+.dark .admin-portal-view {
+  background-color: #090d16 !important;
+}
+
+/* Override background colors of panels and cards */
+.admin-portal-view .bg-slate-900\/40,
+.light .admin-portal-view .bg-slate-900\/40,
+.wine .admin-portal-view .bg-slate-900\/40 {
+  background-color: rgba(15, 23, 42, 0.4) !important;
+}
+
+.admin-portal-view .bg-slate-955\/40,
+.admin-portal-view .bg-slate-950\/40,
+.light .admin-portal-view .bg-slate-950\/40,
+.wine .admin-portal-view .bg-slate-950\/40,
+.light .admin-portal-view .bg-slate-950\/20,
+.wine .admin-portal-view .bg-slate-950\/20 {
+  background-color: rgba(2, 6, 23, 0.4) !important;
+  color: #ffffff !important;
+}
+
+.admin-portal-view .bg-slate-950\/50,
+.light .admin-portal-view .bg-slate-950\/50,
+.wine .admin-portal-view .bg-slate-950\/50 {
+  background-color: rgba(2, 6, 23, 0.5) !important;
+}
+
+.admin-portal-view .bg-slate-955\/80,
+.admin-portal-view .bg-slate-950\/80,
+.light .admin-portal-view .bg-slate-950\/80,
+.wine .admin-portal-view .bg-slate-950\/80 {
+  background-color: rgba(2, 6, 23, 0.8) !important;
+}
+
+.admin-portal-view .bg-slate-900\/30,
+.light .admin-portal-view .bg-slate-900\/30,
+.wine .admin-portal-view .bg-slate-900\/30 {
+  background-color: rgba(15, 23, 42, 0.3) !important;
+}
+
+.admin-portal-view .bg-slate-900\/50,
+.light .admin-portal-view .bg-slate-900\/50,
+.wine .admin-portal-view .bg-slate-900\/50 {
+  background-color: rgba(15, 23, 42, 0.5) !important;
+}
+
+.admin-portal-view .bg-slate-800,
+.light .admin-portal-view .bg-slate-800,
+.wine .admin-portal-view .bg-slate-800 {
+  background-color: #1e293b !important; /* dark slate gray */
+  color: #cbd5e1 !important;
+}
+
+.admin-portal-view .border-slate-800,
+.admin-portal-view .border-slate-800\/60,
+.admin-portal-view .border-slate-800\/30,
+.admin-portal-view .border-slate-700,
+.light .admin-portal-view .border-slate-800,
+.light .admin-portal-view .border-slate-800\/60,
+.light .admin-portal-view .border-slate-800\/30,
+.light .admin-portal-view .border-slate-700,
+.wine .admin-portal-view .border-slate-800,
+.wine .admin-portal-view .border-slate-800\/60,
+.wine .admin-portal-view .border-slate-800\/30,
+.wine .admin-portal-view .border-slate-700 {
+  border-color: rgba(51, 65, 85, 0.5) !important;
+}
+
+/* Specific Search bar input overrides */
+.admin-portal-view input,
+.light .admin-portal-view input,
+.wine .admin-portal-view input {
+  color: #ffffff !important;
+  background-color: rgba(2, 6, 23, 0.8) !important;
+  border-color: rgba(51, 65, 85, 0.6) !important;
+}
+
+.admin-portal-view input::placeholder,
+.light .admin-portal-view input::placeholder,
+.wine .admin-portal-view input::placeholder {
+  color: #64748b !important;
+}

@@ -10,9 +10,14 @@ export const categories = [
     image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=300",
   },
   {
+    id: "9",
+    name: "Mobiles",
+    image: "https://media.licdn.com/dms/image/v2/D4D12AQG0NMBwOtr-IA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1712297539871?e=2147483647&v=beta&t=E-ccKcy0Sr4Nz5NqcEM0sW70Pc6w-tB1_PucQjjN3OM",
+  },
+  {
     id: "3",
-    name: "Home & Garden",
-    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=300",
+    name: "Home",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKpvCqGI4-FgKWCPAxdF_RW3t7fvfoJksAww&s",
   },
   {
     id: "4",
@@ -38,5 +43,10 @@ export const categories = [
     id: "8",
     name: "Kids & Baby",
     image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=300",
+  },
+  {
+    id: "10",
+    name: "Balaji Grocery",
+    image: "/balaji_grocery_logo.jpg",
   },
 ];
