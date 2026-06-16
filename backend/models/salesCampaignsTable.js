@@ -36,21 +36,19 @@ export async function createSalesCampaignsTable() {
       );
     `;
     await database.query(query);
-
-    // ALTER TABLE to add any missing columns for already-existing tables on Render/Supabase
+    // Alter table to add all missing columns for existing tables
     await database.query(`
-      ALTER TABLE sales_campaigns
+      ALTER TABLE sales_campaigns 
       ADD COLUMN IF NOT EXISTS ai_image_url TEXT,
       ADD COLUMN IF NOT EXISTS banner_image TEXT,
       ADD COLUMN IF NOT EXISTS media_assets JSONB DEFAULT '[]',
       ADD COLUMN IF NOT EXISTS category VARCHAR(255) DEFAULT 'All Categories',
-      ADD COLUMN IF NOT EXISTS design_theme VARCHAR(100) DEFAULT 'luxury',
-      ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+      ADD COLUMN IF NOT EXISTS design_theme VARCHAR(100) DEFAULT 'luxury';
     `);
-
     console.log("✅ Sales Campaigns Table Created/Verified Successfully");
   } catch (error) {
     console.error("❌ Failed To Create Sales Campaigns Table.", error);
     process.exit(1);
   }
 }
+
