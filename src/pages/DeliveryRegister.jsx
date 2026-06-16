@@ -30,8 +30,13 @@ export default function DeliveryRegister() {
     confirmPassword: "",
     bank_account_holder: "",
     bank_account_number: "",
+    confirm_bank_account_number: "",
     bank_ifsc: ""
   });
+
+  // State for selfie upload option after biometric
+  const [selfieUploadFile, setSelfieUploadFile] = useState(null);
+  const [selfieUploadPreview, setSelfieUploadPreview] = useState("");
 
   // Verification States
   const [phoneOtp, setPhoneOtp] = useState("");
@@ -899,16 +904,19 @@ export default function DeliveryRegister() {
       if (!formData.address) {
         return toast.error("Please specify your manual address.");
       }
-      if (!filePreviews.aadhaarFront || !filePreviews.panCard) {
-        return toast.error("Aadhaar Card Front and PAN Card are mandatory documents.");
+      if (!filePreviews.aadhaarFront || !filePreviews.aadhaarBack || !filePreviews.panCard || !filePreviews.addressProofFile) {
+        return toast.error("Aadhaar Front, Aadhaar Back, PAN Card and Address Proof are all mandatory.");
       }
     } else if (currentStep === 3) {
-      if (!formData.vehicle_number || !filePreviews.drivingLicense) {
-        return toast.error("Vehicle Number and Driving License are mandatory.");
+      if (!formData.vehicle_number || !filePreviews.rcFile || !filePreviews.vehiclePhoto || !filePreviews.drivingLicense) {
+        return toast.error("Vehicle Number, RC Document, Vehicle Photo and Driving License are all mandatory.");
       }
     } else if (currentStep === 4) {
-      if (!formData.bank_account_holder || !formData.bank_account_number || !formData.bank_ifsc) {
-        return toast.error("Please enter complete bank credentials.");
+      if (!formData.bank_account_holder || !formData.bank_account_number || !formData.bank_ifsc || !filePreviews.chequeFile) {
+        return toast.error("Please fill all bank details and upload cheque/passbook.");
+      }
+      if (formData.bank_account_number !== formData.confirm_bank_account_number) {
+        return toast.error("Account number and confirm account number do not match.");
       }
     }
     setCurrentStep(prev => prev + 1);
@@ -998,6 +1006,9 @@ export default function DeliveryRegister() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="ramesh@gmail.com"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    spellCheck={false}
                     className="w-full bg-emerald-50/50 border border-emerald-100 focus:border-emerald-500 focus:bg-white rounded-xl pl-9 pr-4 py-2.5 outline-none text-xs text-emerald-955 font-bold transition"
                     required
                   />
@@ -1050,9 +1061,15 @@ export default function DeliveryRegister() {
                     type="tel"
                     name="phone"
                     value={formData.phone}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                      setFormData(prev => ({ ...prev, phone: val }));
+                    }}
                     placeholder="9998887776"
+                    maxLength={10}
+                    pattern="[0-9]{10}"
                     disabled={isPhoneVerified}
+                    autoComplete="off"
                     className="w-full bg-emerald-50/50 border border-emerald-100 focus:border-emerald-500 focus:bg-white rounded-xl pl-9 pr-4 py-2.5 outline-none text-xs text-emerald-955 font-bold transition disabled:bg-slate-50 disabled:text-slate-400"
                     required
                   />
@@ -1140,6 +1157,7 @@ export default function DeliveryRegister() {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="••••••••"
+                    autoComplete="new-password"
                     className="w-full bg-emerald-50/50 border border-emerald-100 focus:border-emerald-500 focus:bg-white rounded-xl pl-9 pr-4 py-2.5 outline-none text-xs text-emerald-955 font-bold transition"
                     required
                   />
@@ -1157,6 +1175,7 @@ export default function DeliveryRegister() {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     placeholder="••••••••"
+                    autoComplete="new-password"
                     className="w-full bg-emerald-50/50 border border-emerald-100 focus:border-emerald-500 focus:bg-white rounded-xl pl-9 pr-4 py-2.5 outline-none text-xs text-emerald-955 font-bold transition"
                     required
                   />
@@ -1202,7 +1221,7 @@ export default function DeliveryRegister() {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[10px] font-black uppercase tracking-wider text-emerald-800">Aadhaar Card Back</label>
+                <label className="block text-[10px] font-black uppercase tracking-wider text-emerald-800">Aadhaar Card Back *</label>
                 <div className="border border-dashed border-emerald-200 bg-emerald-50/20 p-3 rounded-xl text-center relative">
                   <label className="cursor-pointer flex flex-col items-center gap-1">
                     {fileContents.aadhaarBack ? <img src={fileContents.aadhaarBack} alt="Aadhaar Back" className="w-14 h-14 object-cover rounded-lg mx-auto mb-1 border border-emerald-200" /> : <Upload size={16} className="text-emerald-600" />}
@@ -1244,7 +1263,7 @@ export default function DeliveryRegister() {
 
               {/* Address proof select + upload */}
               <div className="space-y-1">
-                <label className="block text-[10px] font-black uppercase tracking-wider text-emerald-800">Address Proof Document</label>
+                <label className="block text-[10px] font-black uppercase tracking-wider text-emerald-800">Address Proof Document *</label>
                 <select
                   value={filePreviews.addressProofType}
                   onChange={(e) => setFilePreviews({...filePreviews, addressProofType: e.target.value})}
@@ -1358,7 +1377,7 @@ export default function DeliveryRegister() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Vehicle Photo */}
               <div className="space-y-1">
-                <label className="block text-[10px] font-black uppercase tracking-wider text-emerald-800">Vehicle Photo</label>
+                <label className="block text-[10px] font-black uppercase tracking-wider text-emerald-800">Vehicle Photo *</label>
                 <div className="border border-dashed border-emerald-200 bg-emerald-50/20 p-2.5 rounded-xl text-center relative">
                   <label className="cursor-pointer flex flex-col items-center gap-1">
                     {fileContents.vehiclePhoto ? <img src={fileContents.vehiclePhoto} alt="Vehicle" className="w-12 h-12 object-cover rounded-lg mx-auto mb-1 border border-emerald-200" /> : <Upload size={14} className="text-emerald-600" />}
@@ -1473,7 +1492,10 @@ export default function DeliveryRegister() {
                   name="bank_account_holder"
                   value={formData.bank_account_holder}
                   onChange={handleChange}
-                  placeholder="Ramesh Kumar"
+                  placeholder="Account holder full name"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
                   className="w-full bg-emerald-50/50 border border-emerald-100 focus:border-emerald-500 focus:bg-white rounded-xl pl-9 pr-4 py-2.5 outline-none text-xs text-emerald-955 font-bold transition"
                   required
                 />
@@ -1493,30 +1515,66 @@ export default function DeliveryRegister() {
                     name="bank_account_number"
                     value={formData.bank_account_number}
                     onChange={handleChange}
-                    placeholder="E.g., 918273849102"
+                    placeholder="Enter account number"
+                    autoComplete="new-password"
                     className="w-full bg-emerald-50/50 border border-emerald-100 focus:border-emerald-500 focus:bg-white rounded-xl pl-9 pr-4 py-2.5 outline-none text-xs text-emerald-955 font-bold transition font-mono tracking-wider"
                     required
                   />
                 </div>
               </div>
 
-              {/* IFSC code */}
+              {/* Confirm Account Number */}
               <div className="space-y-1">
-                <label className="block text-[10px] font-black uppercase tracking-wider text-emerald-800">IFSC Code *</label>
+                <label className="block text-[10px] font-black uppercase tracking-wider text-emerald-800">Confirm Account Number *</label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-emerald-600 pointer-events-none">
-                    <Shield size={14} />
+                    <Landmark size={14} />
                   </span>
                   <input
                     type="text"
-                    name="bank_ifsc"
-                    value={formData.bank_ifsc}
+                    name="confirm_bank_account_number"
+                    value={formData.confirm_bank_account_number}
                     onChange={handleChange}
-                    placeholder="SBIN0001234"
-                    className="w-full bg-emerald-50/50 border border-emerald-100 focus:border-emerald-500 focus:bg-white rounded-xl pl-9 pr-4 py-2.5 outline-none text-xs text-emerald-955 font-bold transition uppercase font-mono"
+                    placeholder="Re-enter account number"
+                    autoComplete="off"
+                    className={`w-full bg-emerald-50/50 border focus:bg-white rounded-xl pl-9 pr-4 py-2.5 outline-none text-xs font-bold transition font-mono tracking-wider ${
+                      formData.confirm_bank_account_number && formData.bank_account_number !== formData.confirm_bank_account_number
+                        ? "border-red-400 text-red-600"
+                        : formData.confirm_bank_account_number && formData.bank_account_number === formData.confirm_bank_account_number
+                        ? "border-emerald-500 text-emerald-800"
+                        : "border-emerald-100 text-emerald-955"
+                    }`}
                     required
                   />
+                  {formData.confirm_bank_account_number && formData.bank_account_number === formData.confirm_bank_account_number && (
+                    <span className="absolute inset-y-0 right-3 flex items-center text-emerald-600">
+                      <CheckCircle2 size={14} />
+                    </span>
+                  )}
                 </div>
+                {formData.confirm_bank_account_number && formData.bank_account_number !== formData.confirm_bank_account_number && (
+                  <p className="text-[9px] text-red-500 font-bold mt-0.5">Account numbers do not match</p>
+                )}
+              </div>
+            </div>
+
+            {/* IFSC Code - full width */}
+            <div className="space-y-1">
+              <label className="block text-[10px] font-black uppercase tracking-wider text-emerald-800">IFSC Code *</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-emerald-600 pointer-events-none">
+                  <Shield size={14} />
+                </span>
+                <input
+                  type="text"
+                  name="bank_ifsc"
+                  value={formData.bank_ifsc}
+                  onChange={handleChange}
+                  placeholder="SBIN0001234"
+                  autoComplete="off"
+                  className="w-full bg-emerald-50/50 border border-emerald-100 focus:border-emerald-500 focus:bg-white rounded-xl pl-9 pr-4 py-2.5 outline-none text-xs text-emerald-955 font-bold transition uppercase font-mono"
+                  required
+                />
               </div>
             </div>
 
@@ -1740,13 +1798,54 @@ export default function DeliveryRegister() {
               )}
 
               {faceMatchStatus === "matched" && (
-                <div className="bg-emerald-955/20 border border-emerald-900 p-2.5 rounded-xl max-w-xs mx-auto text-center animate-fadeIn space-y-1">
-                  <div className="text-[10px] font-black uppercase text-emerald-400 font-mono tracking-widest flex items-center justify-center gap-1">
-                    <CheckCircle2 size={12} /> Aadhaar Photo Matched!
+                <div className="space-y-3 max-w-xs mx-auto animate-fadeIn">
+                  <div className="bg-emerald-955/20 border border-emerald-900 p-2.5 rounded-xl text-center space-y-1">
+                    <div className="text-[10px] font-black uppercase text-emerald-400 font-mono tracking-widest flex items-center justify-center gap-1">
+                      <CheckCircle2 size={12} /> Biometric Verified!
+                    </div>
+                    <p className="text-[9px] text-slate-400 font-sans">
+                      Match Score: <strong className="text-white font-mono">{faceMatchPercentage}%</strong> (Passing &ge; 90%)
+                    </p>
                   </div>
-                  <p className="text-[9px] text-slate-400 font-sans">
-                    Match Confidence Score: <strong className="text-white font-mono">{faceMatchPercentage}%</strong> (Passing &ge; 90%)
-                  </p>
+
+                  {/* Selfie Upload Option */}
+                  <div className="bg-slate-800 border border-slate-700 rounded-xl p-3 text-center space-y-2">
+                    <p className="text-[9px] font-black uppercase tracking-wider text-emerald-400">📸 Upload Additional Selfie (Optional)</p>
+                    <p className="text-[8px] text-slate-400 font-sans">You can upload a clear selfie photo for identity records</p>
+                    {selfieUploadPreview ? (
+                      <div className="relative">
+                        <img src={selfieUploadPreview} alt="Selfie" className="w-20 h-20 object-cover rounded-full border-2 border-emerald-500 mx-auto" />
+                        <button
+                          type="button"
+                          onClick={() => { setSelfieUploadPreview(""); setSelfieUploadFile(null); }}
+                          className="absolute top-0 right-[calc(50%-40px-10px)] bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 transition"
+                        >
+                          <XIcon size={10} />
+                        </button>
+                      </div>
+                    ) : null}
+                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-[9px] font-black uppercase tracking-wider transition">
+                      <Camera size={12} />
+                      {selfieUploadPreview ? "Change Selfie" : "Upload Selfie Photo"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="user"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            setSelfieUploadFile(file);
+                            compressImage(file, (dataUrl) => {
+                              setSelfieUploadPreview(dataUrl);
+                              setCapturedSelfie(dataUrl);
+                              toast.success("✅ Selfie photo saved!");
+                            });
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
               )}
             </div>
