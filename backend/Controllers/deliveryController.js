@@ -228,8 +228,8 @@ export const loginDeliveryAgent = catchAsyncErrors(async (req, res, next) => {
     .cookie("delivery_token", token, {
       expires: new Date(Date.now() + (process.env.COOKIE_EXPIRES_IN || 7) * 24 * 60 * 60 * 1000),
       httpOnly: true,
-      secure: false,
-      sameSite: "lax"
+      secure: true,
+      sameSite: "none"
     })
     .json({
       success: true,
@@ -275,8 +275,8 @@ export const logoutDeliveryAgent = catchAsyncErrors(async (req, res, next) => {
   res.cookie("delivery_token", "", {
     expires: new Date(Date.now()),
     httpOnly: true,
-    secure: false,
-    sameSite: "lax"
+    secure: true,
+    sameSite: "none"
   });
   res.status(200).json({
     success: true,
