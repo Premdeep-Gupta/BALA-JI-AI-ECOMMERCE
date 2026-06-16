@@ -684,6 +684,18 @@ export default function DeliveryPortal() {
           backendAvailableRef.current = true; // Backend is online and responding
         }
       } catch (err) {
+        // ── 404 = "Delivery agent not found in DB" ──
+        // This means the JWT token references an agent that doesn't exist in the
+        // Render production database (e.g. registered locally, or account deleted).
+        // Force re-login so the agent gets a fresh token for a valid account.
+        if (err.response?.status === 404) {
+          console.warn("Agent not found in backend DB — clearing stale token and redirecting to login.");
+          toast.error("🔐 Session expired or account not found. Please login again.", { autoClose: 3500 });
+          localStorage.removeItem("token");
+          localStorage.removeItem("delivery_session_phone");
+          setTimeout(() => navigate("/delivery/login"), 3000);
+          return;
+        }
         console.warn("Backend profile fetch failed, using local cache fallback:", err.message);
         // Mark backend as unavailable — all shift-fine checks will be skipped until a
         // successful API response is received (prevents false blocks during Render cold-start).
@@ -2510,18 +2522,27 @@ export default function DeliveryPortal() {
   };
 
   const handleLogout = async () => {
+    // Always perform local cleanup regardless of backend response.
+    // This ensures the agent can ALWAYS logout even when Render is down or 404.
+    const doLocalLogout = () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("delivery_session_phone");
+      Object.values(simIntervals.current).forEach(clearInterval);
+      stopAlarmSiren();
+      if (countdownTimer.current) clearInterval(countdownTimer.current);
+      navigate("/delivery/login");
+    };
+
     try {
       const res = await axiosInstance.get("/delivery/logout");
       if (res.data.success) {
         toast.success(res.data.message || "Logged out successfully.");
-        Object.values(simIntervals.current).forEach(clearInterval);
-        stopAlarmSiren();
-        if (countdownTimer.current) clearInterval(countdownTimer.current);
-        navigate("/delivery/login");
       }
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to log out. Please try again.");
+      console.error("Logout API failed, forcing local logout:", err.message);
+      toast.info("Logged out locally.");
+    } finally {
+      doLocalLogout(); // Always clear session and redirect
     }
   };
 
