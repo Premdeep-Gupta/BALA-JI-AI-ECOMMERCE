@@ -27,15 +27,27 @@ export async function createSalesCampaignsTable() {
         clicks INTEGER DEFAULT 0,
         conversions INTEGER DEFAULT 0,
         ai_image_url TEXT,
+        banner_image TEXT,
+        media_assets JSONB DEFAULT '[]',
+        category VARCHAR(255) DEFAULT 'All Categories',
+        design_theme VARCHAR(100) DEFAULT 'luxury',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
     await database.query(query);
-    // Alter table to add ai_image_url if not exists for existing tables
+
+    // ALTER TABLE to add any missing columns for already-existing tables on Render/Supabase
     await database.query(`
-      ALTER TABLE sales_campaigns ADD COLUMN IF NOT EXISTS ai_image_url TEXT;
+      ALTER TABLE sales_campaigns
+      ADD COLUMN IF NOT EXISTS ai_image_url TEXT,
+      ADD COLUMN IF NOT EXISTS banner_image TEXT,
+      ADD COLUMN IF NOT EXISTS media_assets JSONB DEFAULT '[]',
+      ADD COLUMN IF NOT EXISTS category VARCHAR(255) DEFAULT 'All Categories',
+      ADD COLUMN IF NOT EXISTS design_theme VARCHAR(100) DEFAULT 'luxury',
+      ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
     `);
+
     console.log("✅ Sales Campaigns Table Created/Verified Successfully");
   } catch (error) {
     console.error("❌ Failed To Create Sales Campaigns Table.", error);
