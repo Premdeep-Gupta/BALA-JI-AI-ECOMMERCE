@@ -186,6 +186,8 @@ export default function DeliveryPortal() {
   const shiftNoLoginTimer = useRef(null);
   const shiftFineApplied = useRef(false);
   const offlineCountRef = useRef(0); // tracks offline events per shift (max 5 before block)
+  const prevOnlineRef = useRef(null); // tracks previous online status to detect actual transitions
+  const sharedAudioCtxRef = useRef(null); // shared AudioContext instance for robust audio playback
   
   // Dynamic Map references
   const leafletLoaded = useLeaflet();
@@ -231,6 +233,21 @@ export default function DeliveryPortal() {
     };
     loadModels();
     return () => { active = false; };
+  }, []);
+
+  // ── Unlock shared AudioContext on first user interaction (browser autoplay fix) ──
+  useEffect(() => {
+    const unlockAudio = () => {
+      if (sharedAudioCtxRef.current && sharedAudioCtxRef.current.state === 'suspended') {
+        sharedAudioCtxRef.current.resume().catch(() => {});
+      }
+    };
+    document.addEventListener('click', unlockAudio);
+    document.addEventListener('touchstart', unlockAudio);
+    return () => {
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('touchstart', unlockAudio);
+    };
   }, []);
 
   const simulateSuccessScan = () => {
@@ -721,6 +738,14 @@ export default function DeliveryPortal() {
 
       // Sync local ref with database value on initial load / profile update
       offlineCountRef.current = agentData.offline_count || 0;
+      // Sync prevOnlineRef so first useEffect run does not count as a new offline event
+      prevOnlineRef.current = agentData.is_online;
+      // Persist "was online today" across page refreshes so the no-show fine does not
+      // falsely fire when the agent logs back in mid-shift after having been online.
+      if (agentData.is_online) {
+        const todayKey = new Date().toISOString().split('T')[0];
+        localStorage.setItem(`was_online_today_${todayKey}`, '1');
+      }
 
       // ✅ If blocked — check if next shift started (auto-unblock) or update window info
       if (agentData.delivery_partner_status === "BLOCKED") {
@@ -1006,6 +1031,13 @@ export default function DeliveryPortal() {
 
   const applyShiftFine = async () => {
     if (shiftFineApplied.current) return;
+    // Guard: do not apply a new fine if the agent is already blocked
+    // (prevents ₹300-per-refresh growth when backend is unreachable)
+    if (agent?.delivery_partner_status === "BLOCKED") return;
+    const sessionPhone = localStorage.getItem("delivery_session_phone");
+    const partners = JSON.parse(localStorage.getItem("balaji_delivery_partners") || "[]");
+    const cached = partners.find(p => p.phone === sessionPhone);
+    if (cached?.delivery_partner_status === "BLOCKED") return;
     shiftFineApplied.current = true;
     
     // Play escalation alarm & vibration
@@ -1153,6 +1185,8 @@ export default function DeliveryPortal() {
   useEffect(() => {
     if (!agent) return;
     const checkBookedShift = () => {
+      // Guard: never run no-show checks if agent is already blocked
+      if (agent?.delivery_partner_status === "BLOCKED") return;
       const key = getTodayKey();
       const booked = bookedShifts[key];
       if (!booked || booked.status === 'blocked') return;
@@ -1167,6 +1201,12 @@ export default function DeliveryPortal() {
         const minsIntoShift = cur - booked.startMins;
 
         if (minsIntoShift >= 10 && !shiftFineApplied.current) {
+          // Only apply the no-show fine if this agent has NEVER been online today.
+          // If they were online at any point (even in a previous page session), the
+          // localStorage flag will be set and we skip the block.
+          const todayKey = new Date().toISOString().split('T')[0];
+          const wasOnlineToday = localStorage.getItem(`was_online_today_${todayKey}`) === '1';
+          if (wasOnlineToday) return; // Agent was working — not a true no-show
           // 10 minutes passed without going online → block + fine
           applyShiftFine();
           return;
@@ -1550,11 +1590,25 @@ export default function DeliveryPortal() {
   // -------------------------------------------------------------
   // WORLD-CLASS WEB AUDIO SMART ALERT ENGINE (SOUND PRIORITY SYSTEM)
   // -------------------------------------------------------------
+
+  // Returns a single shared AudioContext, creating it lazily and resuming if suspended.
+  // This avoids browser limits on simultaneous AudioContext instances.
+  const getSharedAudioCtx = () => {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return null;
+    if (!sharedAudioCtxRef.current || sharedAudioCtxRef.current.state === 'closed') {
+      sharedAudioCtxRef.current = new AudioContextClass();
+    }
+    if (sharedAudioCtxRef.current.state === 'suspended') {
+      sharedAudioCtxRef.current.resume().catch(() => {});
+    }
+    return sharedAudioCtxRef.current;
+  };
+
   const playEventSound = (eventType) => {
     try {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) return;
-      const ctx = new AudioContextClass();
+      const ctx = getSharedAudioCtx();
+      if (!ctx) return;
       
       const now = ctx.currentTime;
       
@@ -1821,9 +1875,8 @@ export default function DeliveryPortal() {
     toast.warn("🚨 SHIFT ALERT: You are offline during active shift hours!");
 
     try {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) return;
-      const ctx = new AudioContextClass();
+      const ctx = getSharedAudioCtx();
+      if (!ctx) return;
       audioCtxRef.current = ctx;
 
       let soundToggle = true;
@@ -1870,12 +1923,8 @@ export default function DeliveryPortal() {
       clearInterval(alarmInterval.current);
       alarmInterval.current = null;
     }
-    if (audioCtxRef.current) {
-      try {
-        audioCtxRef.current.close();
-      } catch (e) {}
-      audioCtxRef.current = null;
-    }
+    // Do NOT close the shared AudioContext — it is reused across all audio calls.
+    audioCtxRef.current = null;
   };
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1900,9 +1949,8 @@ export default function DeliveryPortal() {
   // Each level loops like a real phone alarm for a duration
   const playAlertLevel = (level = 'medium') => {
     try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
+      const ctx = getSharedAudioCtx();
+      if (!ctx) return;
       const masterGain = ctx.createGain();
       masterGain.connect(ctx.destination);
       const now = ctx.currentTime;
@@ -2217,10 +2265,22 @@ export default function DeliveryPortal() {
 
     const shiftActive = isShiftActive(agent.shift_preference);
 
+    // Track online→offline transitions. null = initial page load.
+    const wasOnline = prevOnlineRef.current;
+    prevOnlineRef.current = agent.is_online;
+
     if (shiftActive && !agent.is_online) {
       // ════════════════════════════════════════════════
       // OFFLINE DURING ACTIVE SHIFT → COUNT + ALARM
       // ════════════════════════════════════════════════
+
+      // Only fire if the agent actually transitioned from online → offline.
+      // wasOnline === null  → page just loaded (no prior state), skip.
+      // wasOnline === false → already offline before this run, skip.
+      if (wasOnline !== true) {
+        stopAlarmSiren();
+        return;
+      }
 
       // Increment offline event count (persists for full shift)
       offlineCountRef.current = (offlineCountRef.current || 0) + 1;
@@ -2390,8 +2450,10 @@ export default function DeliveryPortal() {
       if (res.data.success) {
         setAgent(prev => ({ ...prev, is_online: nextOnlineState }));
         toast.success(`You are now ${nextOnlineState ? "ONLINE 🟢" : "OFFLINE 🔴"}`);
-        // ✅ Refresh orders after status change to show/hide assigned deliveries
+        // Persist "was online today" when agent goes online (survives page refresh)
         if (nextOnlineState) {
+          const todayKey = new Date().toISOString().split('T')[0];
+          localStorage.setItem(`was_online_today_${todayKey}`, '1');
           setTimeout(() => fetchProfileAndOrders(), 500);
         }
       }

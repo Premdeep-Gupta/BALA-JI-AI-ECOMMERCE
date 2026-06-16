@@ -414,7 +414,17 @@ export default function DeliveryAgentVerificationModal({ agent, onClose, onRefre
     { id: "payment",   label: "Payment & Shifts", icon: <BarChart3 size={13} /> },
   ];
 
-  const docs = agent.documents || {};
+  // Safely parse documents: PostgreSQL JSONB may arrive as a plain object (local)
+  // or as a JSON string (production Render/Vercel pg driver behaviour).
+  const docs = (() => {
+    try {
+      if (!agent.documents) return {};
+      if (typeof agent.documents === 'string') return JSON.parse(agent.documents);
+      return agent.documents;
+    } catch {
+      return {};
+    }
+  })();
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 text-slate-300">

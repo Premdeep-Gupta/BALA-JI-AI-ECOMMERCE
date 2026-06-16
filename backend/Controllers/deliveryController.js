@@ -888,16 +888,26 @@ export const logOfflineEvent = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Event type is required.", 400));
   }
 
-  // Increment offline_count on the agent record and get new value
-  const updated = await database.query(
-    `UPDATE delivery_agents
-     SET offline_count = COALESCE(offline_count, 0) + 1
-     WHERE id = $1
-     RETURNING offline_count`,
-    [agentId]
-  );
+  let newCount = 0;
 
-  const newCount = updated.rows[0]?.offline_count || 0;
+  if (event_type === "Offline Event") {
+    // Increment offline_count on the agent record and get new value
+    const updated = await database.query(
+      `UPDATE delivery_agents
+       SET offline_count = COALESCE(offline_count, 0) + 1
+       WHERE id = $1
+       RETURNING offline_count`,
+      [agentId]
+    );
+    newCount = updated.rows[0]?.offline_count || 0;
+  } else {
+    // Just fetch the current offline_count without incrementing it
+    const current = await database.query(
+      `SELECT offline_count FROM delivery_agents WHERE id = $1`,
+      [agentId]
+    );
+    newCount = current.rows[0]?.offline_count || 0;
+  }
 
   // Log the offline event
   await database.query(
