@@ -960,9 +960,9 @@ export default function DeliveryPortal() {
         const fetchedOrders = ordersRes.data.orders || [];
 
         // 🔔 New Order Alarm: detect newly assigned orders
+        const validStatuses = ['Processing', 'Order Packed', 'Shipped', 'Picked Up', 'Out for Delivery', 'Exchange Out for Delivery', 'Delivered', 'Exchange Completed'];
         const newOrders = fetchedOrders.filter(
-          o => !existingOrderIds.current.has(o.id) &&
-               (o.order_status === "Out for Delivery" || o.order_status === "Exchange Out for Delivery")
+          o => !existingOrderIds.current.has(o.id) && validStatuses.includes(o.order_status)
         );
         if (newOrders.length > 0) {
           playNewOrderAlarm();
@@ -2475,11 +2475,19 @@ export default function DeliveryPortal() {
       }
     } catch (err) {
       console.error(err);
-      // Show a more informative error if blocked
       if (err.response?.status === 403) {
+        // Blocked on server — show block message, do NOT update local state
         toast.error("Account blocked. Contact admin to restore access.");
       } else {
-        toast.error("Failed to update online status.");
+        // Backend unreachable (404 Render cold-start / network error):
+        // Update state locally so offline alarm & countdown still fire correctly.
+        console.warn("update-status backend unavailable, updating state locally:", err.message);
+        setAgent(prev => ({ ...prev, is_online: nextOnlineState }));
+        if (nextOnlineState) {
+          const todayKey = new Date().toISOString().split('T')[0];
+          localStorage.setItem(`was_online_today_${todayKey}`, '1');
+        }
+        toast.warn(`Status updated locally (server unreachable). You are now ${nextOnlineState ? 'ONLINE 🟢' : 'OFFLINE 🔴'}.`);
       }
     }
   };

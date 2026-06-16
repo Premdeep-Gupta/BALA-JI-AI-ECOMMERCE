@@ -408,7 +408,11 @@ export const getAssignedOrders = catchAsyncErrors(async (req, res, next) => {
      FROM orders o
      LEFT JOIN shipping_info s ON o.id = s.order_id
      LEFT JOIN order_items oi ON o.id = oi.order_id
-     WHERE o.delivery_boy_phone = $1 AND o.order_status IN ('Out for Delivery', 'Exchange Out for Delivery', 'Delivered', 'Exchange Completed')
+     WHERE o.delivery_boy_phone = $1 AND o.order_status IN (
+       'Processing', 'Order Packed', 'Shipped', 'Picked Up',
+       'Out for Delivery', 'Exchange Out for Delivery',
+       'Delivered', 'Exchange Completed'
+     )
      GROUP BY o.id, s.id
      ORDER BY o.created_at DESC`,
     [agentPhone]
