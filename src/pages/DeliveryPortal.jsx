@@ -187,6 +187,9 @@ export default function DeliveryPortal() {
   const shiftFineApplied = useRef(false);
   const offlineCountRef = useRef(0); // tracks offline events per shift (max 5 before block)
   const prevOnlineRef = useRef(null); // tracks previous online status to detect actual transitions
+  // Tracks whether the Render/production backend responded successfully on last fetch.
+  // If backend is sleeping (404), ALL shift-fine logic is skipped to prevent false blocks.
+  const backendAvailableRef = useRef(false);
   const sharedAudioCtxRef = useRef(null); // shared AudioContext instance for robust audio playback
   
   // Dynamic Map references
@@ -678,9 +681,13 @@ export default function DeliveryPortal() {
         });
         if (res.data.success) {
           serverPartner = res.data.deliveryAgent;
+          backendAvailableRef.current = true; // Backend is online and responding
         }
       } catch (err) {
         console.warn("Backend profile fetch failed, using local cache fallback:", err.message);
+        // Mark backend as unavailable — all shift-fine checks will be skipped until a
+        // successful API response is received (prevents false blocks during Render cold-start).
+        backendAvailableRef.current = false;
       }
 
       const partners = JSON.parse(localStorage.getItem("balaji_delivery_partners") || "[]");
@@ -1031,6 +1038,12 @@ export default function DeliveryPortal() {
 
   const applyShiftFine = async () => {
     if (shiftFineApplied.current) return;
+    // Guard: only apply fine when backend is actually online.
+    // If Render is sleeping/cold-starting (404), we must NOT block the agent.
+    if (!backendAvailableRef.current) {
+      console.warn("applyShiftFine skipped — backend unavailable (Render sleeping)");
+      return;
+    }
     // Guard: do not apply a new fine if the agent is already blocked
     // (prevents ₹300-per-refresh growth when backend is unreachable)
     if (agent?.delivery_partner_status === "BLOCKED") return;
@@ -1187,6 +1200,9 @@ export default function DeliveryPortal() {
     const checkBookedShift = () => {
       // Guard: never run no-show checks if agent is already blocked
       if (agent?.delivery_partner_status === "BLOCKED") return;
+      // Guard: never run fine logic if backend is unreachable (Render cold-start)
+      // This prevents false blocks when the agent logs in while the server is waking up.
+      if (!backendAvailableRef.current) return;
       const key = getTodayKey();
       const booked = bookedShifts[key];
       if (!booked || booked.status === 'blocked') return;
@@ -1200,47 +1216,38 @@ export default function DeliveryPortal() {
       if (!agent.is_online) {
         const minsIntoShift = cur - booked.startMins;
 
-        // ─── Escalating alarms based on how late the agent is ───────────────
-        // We NEVER block from this path — only the 5-offline-event monitor blocks.
-        // This allows agents who log in late to still work their shift.
-        if (minsIntoShift >= 15) {
-          // Very late — play max alarm every 30s cycle
-          playAlertLevel('max'); vibrateDevice([500, 200, 500, 200, 500]);
-          requestNotification(
-            `🚨 URGENT! Go Online NOW! (${minsIntoShift} min late)`,
-            `You booked ${booked.label} but are OFFLINE for ${minsIntoShift} minutes!`
-          );
-          setShiftAlertModal({ open: true, type: 'no_login', minsLeft: 0, booked });
-        } else if (minsIntoShift >= 10) {
-          playAlertLevel('max'); vibrateDevice([500, 200, 500, 200, 500]);
-          requestNotification(
-            `🚨 Go Online NOW! (${minsIntoShift} min late)`,
-            `You booked ${booked.label} but are OFFLINE. Please go online immediately!`
-          );
-          setShiftAlertModal({ open: true, type: 'no_login', minsLeft: 0, booked });
-        } else if (minsIntoShift >= 7) {
-          playAlertLevel('max'); vibrateDevice([500, 200, 500, 200, 500]);
-          requestNotification(
-            `🚨 Go Online NOW! (${10 - minsIntoShift} min left)`,
-            `You booked ${booked.label} but are OFFLINE. ${10 - minsIntoShift} minute(s) left!`
-          );
-          setShiftAlertModal({ open: true, type: 'no_login', minsLeft: 10 - minsIntoShift, booked });
-        } else if (minsIntoShift >= 4) {
-          playAlertLevel('loud'); vibrateDevice([300, 100, 300]);
-          requestNotification(
-            `⚠️ Go Online! (${10 - minsIntoShift} min left)`,
-            `You booked ${booked.label} but are OFFLINE. ${10 - minsIntoShift} minute(s) left!`
-          );
-          setShiftAlertModal({ open: true, type: 'no_login', minsLeft: 10 - minsIntoShift, booked });
-        } else {
-          playAlertLevel('medium'); vibrateDevice([200, 100, 200]);
-          requestNotification(
-            `⚠️ Go Online! (${10 - minsIntoShift} min left)`,
-            `You booked ${booked.label} but are OFFLINE.`
-          );
-          setShiftAlertModal({ open: true, type: 'no_login', minsLeft: 10 - minsIntoShift, booked });
+        if (minsIntoShift >= 10 && !shiftFineApplied.current) {
+          // Only apply the no-show fine if this agent has NEVER been online today.
+          // If they were online at any point (even in a previous page session), the
+          // localStorage flag will be set and we skip the block.
+          const todayKey = new Date().toISOString().split('T')[0];
+          const wasOnlineToday = localStorage.getItem(`was_online_today_${todayKey}`) === '1';
+          if (wasOnlineToday) return; // Agent was working — not a true no-show
+          // 10 minutes passed without going online → block + fine
+          applyShiftFine();
+          return;
         }
 
+        // Escalating alarms: louder as time goes on
+        if (minsIntoShift < 10) {
+          if (minsIntoShift >= 7) {
+            playAlertLevel('max'); vibrateDevice([500, 200, 500, 200, 500]);
+          } else if (minsIntoShift >= 4) {
+            playAlertLevel('loud'); vibrateDevice([300, 100, 300]);
+          } else {
+            playAlertLevel('medium'); vibrateDevice([200, 100, 200]);
+          }
+          requestNotification(
+            `🚨 Go Online NOW! (${10 - minsIntoShift} min left)`,
+            `You booked ${booked.label} but are OFFLINE. ${10 - minsIntoShift} minute(s) before shift is blocked & ₹300 fine!`
+          );
+          setShiftAlertModal({
+            open: true,
+            type: 'no_login',
+            minsLeft: 10 - minsIntoShift,
+            booked
+          });
+        }
       } else {
         // Agent is online — clear any fine timers
         if (shiftNoLoginTimer.current) {
