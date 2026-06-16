@@ -142,10 +142,17 @@ export const authorizedRoles = (...roles) => {
 // ================= DELIVERY AGENT AUTH =================
 export const isDeliveryAgentAuthenticated = catchAsyncErrors(
   async (req, res, next) => {
-    let token = req.cookies.delivery_token;
+    // ✅ Check Authorization header FIRST (takes priority over cookies)
+    // This prevents stale browser cookies from causing 404 in cross-origin deployments
+    let token = null;
 
-    if (!token && req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+    if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
       token = req.headers.authorization.split(" ")[1];
+    }
+
+    // Fall back to cookie only if no Bearer header
+    if (!token) {
+      token = req.cookies.delivery_token;
     }
 
     if (!token) {
