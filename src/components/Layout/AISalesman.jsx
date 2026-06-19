@@ -55,6 +55,173 @@ const speakText = (text) => {
   window.speechSynthesis.speak(utter);
 };
 
+const detectLanguageCode = (text) => {
+  if (!text) return 'en';
+  if (/[\u0980-\u09FF]/.test(text)) return 'bn';
+  if (/[\u0900-\u097F]/.test(text)) return 'hi';
+  if (/[\u0B80-\u0BFF]/.test(text)) return 'ta';
+  if (/[\u0C00-\u0C7F]/.test(text)) return 'te';
+  if (/[\u0C80-\u0CFF]/.test(text)) return 'kn';
+  if (/[\u0D00-\u0D7F]/.test(text)) return 'ml';
+  if (/[\u0A80-\u0AFF]/.test(text)) return 'gu';
+  if (/[\u0A00-\u0A7F]/.test(text)) return 'pa';
+  if (/[\u0B00-\u0B7F]/.test(text)) return 'or';
+  if (/[\u0600-\u06FF]/.test(text)) return 'ur';
+  
+  const lower = text.toLowerCase();
+  if (/\b(dikhao|chahiye|hai|sasta|kam|mili|he|ko|se|ya|bhi|kuch|aur|nhi|sahi|hai|kar|diya|karein|karta|hai|namaste|lelo|juta|jute|sari|saree)\b/.test(lower)) {
+    return 'hi_hinglish';
+  }
+  return 'en';
+};
+
+const LOCALIZED_RESPONSES = {
+  en: {
+    addToCartSuccess: (name) => `I have added **${name}** to your cart. Please open the cart to checkout! 🛒`,
+    addToCartSpecify: "Which item would you like to add? Please specify the correct product name! 🛍️",
+    budgetSuccess: (maxPrice) => `Here are the best matching products within your budget of **₹${maxPrice.toLocaleString()}**! 💰`,
+    budgetNoMatch: (maxPrice) => `No exact matches found in the ₹${maxPrice.toLocaleString()} range, but feel free to explore our collections!`,
+    compareSuccess: (n1, n2) => `I can check that! The comparison between **${n1}** and **${n2}** is ready. ⚖️`,
+    compareSpecify: "Select specs to compare laptops or mobile devices. ⚖️",
+    bestIntro: "These are the Top Rated and Highly Recommended premium products in our catalog! ⭐",
+    searchSuccess: (name) => `I found matching products and recommendations for **${name}** in the catalog! 🚀`,
+    welcome: `Welcome to Balaji Mart! You can ask to **"compare"**, search **"affordable products"**, or find **"laptops under ₹50,000"** and I will get instant results for you! 🤖`,
+    voiceSearch: (count, text) => `${count} products found for "${text}". Check them out!`
+  },
+  bn: {
+    addToCartSuccess: (name) => `আমি আপনার কার্টে **${name}** যোগ করেছি। চেকআউট করতে কার্ট খুলুন! 🛒`,
+    addToCartSpecify: "আপনি কোন আইটেমটি যোগ করতে চান? সঠিক পণ্যটির নাম উল্লেখ করুন! 🛍️",
+    budgetSuccess: (maxPrice) => `আপনার বাজেট **₹${maxPrice.toLocaleString()}** এর মধ্যে সেরা পণ্যগুলি এখানে রয়েছে! 💰`,
+    budgetNoMatch: (maxPrice) => `₹${maxPrice.toLocaleString()} সীমার মধ্যে কোনো সঠিক মিল পাওয়া যায়নি, তবে আমাদের কালেকশন ঘুরে দেখতে পারেন!`,
+    compareSuccess: (n1, n2) => `আমি এটি তুলনা করতে পারি! **${n1}** এবং **${n2}** এর মধ্যে তুলনা প্রস্তুত। ⚖️`,
+    compareSpecify: "ল্যাপটপ বা মোবাইল ডিভাইস তুলনা করতে স্পেসিফিকেশন নির্বাচন করুন। ⚖️",
+    bestIntro: "এগুলি আমাদের ক্যাটালগে সেরা রেটযুক্ত এবং অত্যন্ত প্রস্তাবিত প্রিমিয়াম পণ্য! ⭐",
+    searchSuccess: (name) => `আমি ক্যাটালগে **${name}** এর জন্য মিল পাওয়া পণ্য এবং সুপারিশ খুঁজে পেয়েছি! 🚀`,
+    welcome: `বালাজি মার্টে স্বাগতম! আপনি **"তুলনা করতে"** বলতে পারেন, **"সাশ্রয়ী পণ্য"** খুঁজতে পারেন অথবা **"₹৫০,০০০ এর নিচে ল্যাপটপ"** খুঁজতে পারেন এবং আমি তাত্ক্ষণিক ফলাফল দেব! 🤖`,
+    voiceSearch: (count, text) => `"${text}" এর জন্য ${count}টি পণ্য পাওয়া গেছে। দেখে নিন!`
+  },
+  hi: {
+    addToCartSuccess: (name) => `मैंने **${name}** को आपके कार्ट में जोड़ दिया है। चेकआउट करने के लिए कार्ट खोलें! 🛒`,
+    addToCartSpecify: "आप कौन सा उत्पाद जोड़ना चाहते हैं? कृपया सही उत्पाद का नाम बताएं! 🛍️",
+    budgetSuccess: (maxPrice) => `यहाँ आपके **₹${maxPrice.toLocaleString()}** के बजट के अंतर्गत सबसे बेहतरीन उत्पाद दिए गए हैं! 💰`,
+    budgetNoMatch: (maxPrice) => `₹${maxPrice.toLocaleString()} की सीमा में कोई सटीक उत्पाद नहीं मिला, लेकिन आप हमारे संग्रह देख सकते हैं!`,
+    compareSuccess: (n1, n2) => `मैं इसकी तुलना कर सकता हूँ! **${n1}** और **${n2}** के बीच तुलना तैयार है। ⚖️`,
+    compareSpecify: "लैपटॉप या मोबाइल उपकरणों की तुलना करने के लिए विशिष्टताओं का चयन करें। ⚖️",
+    bestIntro: "ये हमारे कैटलॉग में टॉप रेटेड और अत्यधिक अनुशंसित प्रीमियम उत्पाद हैं! ⭐",
+    searchSuccess: (name) => `मुझे कैटलॉग में **${name}** के लिए मिलते-जुलते उत्पाद और सिफारिशें मिली हैं! 🚀`,
+    welcome: `बालाजी मार्ट में आपका स्वागत है! आप **"तुलना"** करने के लिए कह सकते हैं, **"सस्ते उत्पाद"** खोज सकते हैं, या **"₹50,000 के तहत लैपटॉप"** ढूंढ सकते हैं और मैं तुरंत परिणाम दूंगा! 🤖`,
+    voiceSearch: (count, text) => `"${text}" के लिए ${count} उत्पाद मिले। इन्हें देखें!`
+  },
+  hi_hinglish: {
+    addToCartSuccess: (name) => `Maine **${name}** ko aapke cart me add kar diya hai. Checkout ke liye cart open karein! 🛒`,
+    addToCartSpecify: "Aap kaun sa item add karna chahte hain? Please sahi product name batayein! 🛍️",
+    budgetSuccess: (maxPrice) => `Ye rahe aapke budget **₹${maxPrice.toLocaleString()}** ke matching products! 💰`,
+    budgetNoMatch: (maxPrice) => `₹${maxPrice.toLocaleString()} range me koi exact match nahi mila, par aap collections check kar sakte hain!`,
+    compareSuccess: (n1, n2) => `Main check kar sakta hoon! **${n1}** aur **${n2}** ka comparison ready hai. ⚖️`,
+    compareSpecify: "Laptops ya mobile compare karne ke liye details select karein. ⚖️",
+    bestIntro: "Ye humare catalog ke Top Rated aur Highly Recommended premium products hain! ⭐",
+    searchSuccess: (name) => `Mujhe catalog me **${name}** ke matching products aur recommendations mile hain! 🚀`,
+    welcome: `Balaji Mart me aapka welcome hai! Aap **"compare"** karne ko bol sakte hain, **"affordable products"** search kar sakte hain, ya **"laptops under ₹50,000"** dhoond sakte hain! 🤖`,
+    voiceSearch: (count, text) => `"${text}" ke liye ${count} products mile hain. Inhe check karein!`
+  },
+  ta: {
+    addToCartSuccess: (name) => `நான் கார்ட்டில் **${name}** ஐச் சேர்த்துள்ளேன். செக்அவுட் செய்ய கார்ட்டைத் திறக்கவும்! 🛒`,
+    addToCartSpecify: "எந்தப் பொருளை சேர்க்க விரும்புகிறீர்கள்? சரியான பொருளின் பெயரை குறிப்பிடவும்! 🛍️",
+    budgetSuccess: (maxPrice) => `உங்கள் பட்ஜெட் **₹${maxPrice.toLocaleString()}** க்குள் சிறந்த தயாரிப்புகள் இதோ! 💰`,
+    budgetNoMatch: (maxPrice) => `₹${maxPrice.toLocaleString()} வரம்பிற்குள் தயாரிப்புகள் எதுவும் இல்லை, ஆனால் எங்கள் சேகரிப்புகளைப் பார்க்கவும்!`,
+    compareSuccess: (n1, n2) => `ஒப்பீடு தயாராக உள்ளது: **${n1}** மற்றும் **${n2}**. ⚖️`,
+    compareSpecify: "ஒப்பிட தயாரிப்புகளைத் தேர்ந்தெடுக்கவும். ⚖️",
+    bestIntro: "இவை சிறந்த மதிப்பீடு பெற்ற தயாரிப்புகள்! ⭐",
+    searchSuccess: (name) => `**${name}** க்கான தயாரிப்புகள் க্যাটாலகில் கண்டறியப்பட்டன! 🚀`,
+    welcome: `பாலாஜி மார்ட்டிற்கு வரவேற்கிறோம்! நீங்கள் தயாரிப்புகளை **"ஒப்பிடலாம்"**, **"மலிவான தயாரிப்புகள்"** தேடலாம். 🤖`,
+    voiceSearch: (count, text) => `"${text}" க்கான ${count} தயாரிப்புகள் கண்டறியப்பட்டன. அவற்றைச் சரிபார்க்கவும்!`
+  },
+  te: {
+    addToCartSuccess: (name) => `నేను కార్ట్‌లో **${name}** జోడించాను. చెకౌట్ చేయడానికి కార్ట్‌ని తెరవండి! 🛒`,
+    addToCartSpecify: "ఏ ఉత్పత్తిని కార్ట్‌లో జోడించాలనుకుంటున్నారు? సరైన ఉత్పత్తి పేరు చెప్పండి! 🛍️",
+    budgetSuccess: (maxPrice) => `మీ బడ్జెట్ **₹${maxPrice.toLocaleString()}** లోపు ఉన్న ఉత్పత్తులు ఇవి! 💰`,
+    budgetNoMatch: (maxPrice) => `ఈ బడ్జెట్లో సరిపోలే ఉత్పత్తులు లేవు, మా ఇతర సేకరణలను చూడండి!`,
+    compareSuccess: (n1, n2) => `**${n1}** మరియు **${n2}** పోలిక సిద్ధంగా ఉంది. ⚖️`,
+    compareSpecify: "పరికరాలను పోల్చడానికి ఎంచుకోండి. ⚖️",
+    bestIntro: "ఇవి మా కేటలాగ్‌లో అత్యుత్తమ ఉత్పత్తులు! ⭐",
+    searchSuccess: (name) => `కేటలాగ్‌లో **${name}** కోసం ఉత్పత్తులు కనుగొనబడ్డాయి! 🚀`,
+    welcome: `బాలాజీమార్ట్‌కు స్వాగతం! మీరు ఉత్పత్తులను **"పోల్చవచ్చు"** లేదా శోధించవచ్చు. 🤖`,
+    voiceSearch: (count, text) => `"${text}" కోసం ${count} ఉత్పత్తులు కనుగొనబడ్డాయి. వాటిని చూడండి!`
+  },
+  kn: {
+    addToCartSuccess: (name) => `ನಾನು ಕಾರ್ಟ್‌ಗೆ **${name}** ಸೇರಿಸಿದ್ದೇನೆ. ಜೆಕ್ಔಟ್ ಮಾಡಲು ಕಾರ್ಟ್ ತೆರೆಯಿರಿ! 🛒`,
+    addToCartSpecify: "ನೀವು ಯಾವ ಉತ್ಪನ್ನವನ್ನು ಸೇರಿಸಲು ಬಯಸುತ್ತೀರಿ? ಸರಿಯಾದ ಉತ್ಪನ್ನದ ಹೆಸರನ್ನು ತಿಳಿಸಿ! 🛍️",
+    budgetSuccess: (maxPrice) => `ನಿಮ್ಮ ಬಜೆಟ್‌ಗೆ **₹${maxPrice.toLocaleString()}** ಹೊಂದಾಣಿಕೆಯಾಗುವ ಉತ್ಪನ್ನಗಳು! 💰`,
+    budgetNoMatch: (maxPrice) => `ಈ ಬೆಲೆಯಲ್ಲಿ ಯಾವುದೇ ಉತ್ಪನ್ನಗಳು ಲಭ್ಯವಿಲ್ಲ, ದಯವಿಟ್ಟು ಬೇರೆ ಉತ್ಪನ್ನ ನೋಡಿ!`,
+    compareSuccess: (n1, n2) => `**${n1}** ಮತ್ತು **${n2}** ಹೋಲಿಕೆ ಸಿದ್ಧವಾಗಿದೆ. ⚖️`,
+    compareSpecify: "ಹೋಲಿಸಲು ಉತ್ಪನ್ನಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಿ. ⚖️",
+    bestIntro: "ಇವು ನಮ್ಮ ಅತ್ಯುತ್ತಮ ರೇಟ್ ಮಾಡಲಾದ ಉತ್ಪನ್ನಗಳು! ⭐",
+    searchSuccess: (name) => `ಕೇಟಲಾಗ್‌ನಲ್ಲಿ **${name}** ಹೊಂದಾಣಿಕೆಯಾಗುವ ಉತ್ಪನ್ನಗಳು ಲಭ್ಯವಿವೆ! 🚀`,
+    welcome: `ಬಾಲಾಜಿಮಾರ್ಟ್‌ಗೆ ಸುಸ್ವಾಗತ! ನೀವು ಉತ್ಪನ್ನಗಳನ್ನು **"ಹೋಲಿಸಬಹುದು"** ಅಥವಾ ಹುಡುಕಬಹುದು. 🤖`,
+    voiceSearch: (count, text) => `"${text}" ಗಾಗಿ ${count} ಉತ್ಪನ್ನಗಳು ಕಂಡುಬಂದಿವೆ. ಅವುಗಳನ್ನು ನೋಡಿ!`
+  },
+  ml: {
+    addToCartSuccess: (name) => `ഞാൻ **${name}** നിങ്ങളുടെ കാർട്ടിൽ ചേർത്തു. ചെക്ക്ഔട്ട് ചെയ്യാൻ കാർട്ട് തുറക്കുക! 🛒`,
+    addToCartSpecify: "നിങ്ങൾ ഏത് ഉൽപ്പന്നമാണ് കാർട്ടിൽ ചേർക്കാൻ ആഗ്രഹിക്കുന്നത്? ഉൽപ്പന്നത്തിന്റെ പേര് വ്യക്തമാക്കുക! 🛍️",
+    budgetSuccess: (maxPrice) => `നിങ്ങളുടെ ബജറ്റായ **₹${maxPrice.toLocaleString()}** നുള്ളിലെ മികച്ച ഉൽപ്പന്നങ്ങൾ ഇതാ! 💰`,
+    budgetNoMatch: (maxPrice) => `ഈ ബജറ്റിൽ ഉൽപ്പന്നങ്ങൾ ലഭ്യമല്ല, ഞങ്ങളുടെ മറ്റ് ശേഖരങ്ങൾ കാണുക!`,
+    compareSuccess: (n1, n2) => `**${n1}** ഉം **${n2}** ഉം തമ്മിലുള്ള താരതമ്യം തയ്യാറാണ്. ⚖️`,
+    compareSpecify: "താരതമ്യം ചെയ്യാൻ ഉപകരണങ്ങൾ തിരഞ്ഞെടുക്കുക. ⚖️",
+    bestIntro: "ഇവ ഞങ്ങളുടെ മികച്ച ഉൽപ്പന്നങ്ങളാണ്! ⭐",
+    searchSuccess: (name) => `**${name}** നുള്ള ഉൽപ്പന്നങ്ങൾ കാറ്റലോഗിൽ കണ്ടെത്തി! 🚀`,
+    welcome: `ബാലാജിമാർട്ടിലേക്ക് സ്വാഗതം! നിങ്ങൾക്ക് ഉൽപ്പന്നങ്ങൾ **"താരതമ്യം"** ചെയ്യാം. 🤖`,
+    voiceSearch: (count, text) => `"${text}" നായി ${count} ഉൽപ്പന്നങ്ങൾ കണ്ടെത്തി. അവ പരിശോധിക്കുക!`
+  },
+  gu: {
+    addToCartSuccess: (name) => `મેં **${name}** ને તમારા કાર્ટમાં ઉમેરી દીધું છે. ચેકઆઉટ કરવા માટે કાર્ટ ખોલો! 🛒`,
+    addToCartSpecify: "તમે કઈ પ્રોડક્ટ ઉમેરવા માંગો છો? કૃપા કરીને સાચું નામ જણાવો! 🛍️",
+    budgetSuccess: (maxPrice) => `તમારા બજેટ **₹${maxPrice.toLocaleString()}** માટે શ્રેષ્ઠ પ્રોડક્ટ્સ અહીં છે! 💰`,
+    budgetNoMatch: (maxPrice) => `આ બજેટમાં કોઈ પ્રોડક્ટ મળી નથી, પરંતુ અમારી અન્ય પ્રોડક્ટ્સ જુઓ!`,
+    compareSuccess: (n1, n2) => `**${n1}** અને **${n2}** ની સરખામણી તૈયાર છે. ⚖️`,
+    compareSpecify: "સરખામણી કરવા માટે પ્રોડક્ટ્સ પસંદ કરો. ⚖️",
+    bestIntro: "આ અમારી સૌથી લોકપ્રિય પ્રોડક્ટ્સ છે! ⭐",
+    searchSuccess: (name) => `કૅટેલોગમાં **${name}** માટે પ્રોડક્ટ્સ મળી છે! 🚀`,
+    welcome: `બાલાજી માર્ટમાં તમારું સ્વાગત છે! તમે પ્રોડક્ટ્સની **"સરખામણી"** કરી શકો છો. 🤖`,
+    voiceSearch: (count, text) => `"${text}" માટે ${count} પ્રોડક્ટ્સ મળી છે. તે જુઓ!`
+  },
+  pa: {
+    addToCartSuccess: (name) => `ਮੈਂ **${name}** ਨੂੰ ਤੁਹਾਡੀ ਕਾਰਟ ਵਿੱਚ ਜੋੜ ਦਿੱਤਾ ਹੈ। ਚੈੱਕਆਉਟ ਲਈ ਕਾਰਟ ਖੋਲ੍ਹੋ! 🛒`,
+    addToCartSpecify: "ਤੁਸੀਂ ਕਿਹੜਾ ਪ੍ਰੋਡਕਟ ਜੋੜਨਾ ਚਾਹੁੰਦੇ ਹੋ? ਕਿਰਪਾ ਕਰਕੇ ਸਹੀ ਪ੍ਰੋਡਕਟ ਦਾ ਨਾਮ ਦੱਸੋ! 🛍️",
+    budgetSuccess: (maxPrice) => `ਤੁਹਾਡੇ ਬਜਟ **₹${maxPrice.toLocaleString()}** ਲਈ ਪ੍ਰੋਡਕਟਸ ਹੇਠਾਂ ਦਿੱਤੇ ਗਏ ਹਨ! 💰`,
+    budgetNoMatch: (maxPrice) => `ਇਸ ਬਜਟ ਵਿੱਚ ਕੋਈ ਮੇਲ ਖਾਂਦਾ ਪ੍ਰੋਡਕਟ ਨਹੀਂ ਮਿਲਿਆ, ਪਰ ਸਾਡੇ ਹੋਰ ਸੰਗ੍ਰਹਿ ਦੇਖੋ!`,
+    compareSuccess: (n1, n2) => `**${n1}** ਅਤੇ **${n2}** ਦੀ ਤੁਲਨਾ ਤਿਆਰ ਹੈ। ⚖️`,
+    compareSpecify: "ਤੁਲਨਾ ਕਰਨ ਲਈ ਪ੍ਰੋਡਕਟਸ ਦੀ ਚੋਣ ਕਰੋ। ⚖️",
+    bestIntro: "ਇਹ ਸਾਡੇ ਸਭ ਤੋਂ ਵਧੀਆ ਰੇਟ ਕੀਤੇ ਪ੍ਰੋਡਕਟਸ ਹਨ! ⭐",
+    searchSuccess: (name) => `ਕੈਟਾਲਾਗ ਵਿੱਚ **${name}** ਲਈ ਪ੍ਰۆਡਕਟਸ ਲੱਭੇ ਗਏ ਹਨ! 🚀`,
+    welcome: `ਬਾਲਾਜੀ ਮਾਰਟ ਵਿੱਚ ਤੁਹਾਡਾ ਸਵਾਗਤ ਹੈ! ਤੁਸੀਂ ਪ੍ਰੋਡਕਟਸ ਦੀ **"ਤੁਲਨਾ"** ਕਰ ਸਕਦੇ ਹੋ। 🤖`,
+    voiceSearch: (count, text) => `"${text}" ਲਈ ${count} ਉਤਪਾਦ ਮਿਲੇ ਹਨ। ਇਹਨਾਂ ਨੂੰ ਦੇਖੋ!`
+  },
+  or: {
+    addToCartSuccess: (name) => `ମୁଁ ଆପଣଙ୍କ କାର୍ଟରେ **${name}** ଯୋଡି ଦେଇଛି। ଚେକଆଉଟ୍ ପାଇଁ କାର୍ଟ ଖୋଲନ୍ତୁ! 🛒`,
+    addToCartSpecify: "ଆପଣ କେଉଁ ପ୍ରଡକ୍ଟ ଯୋଡିବାକୁ ଚାହୁଁଛନ୍ତି? ଦୟାକରି ସଠିକ୍ ପ୍ରଡକ୍ଟର ନାମ ଲେଖନ୍ତು! 🛍️",
+    budgetSuccess: (maxPrice) => `ଆପଣଙ୍କ ବଜେଟ୍ **₹${maxPrice.toLocaleString()}** ପାଇଁ ଉପଯୁକ୍ତ ପ୍ରଡକ୍ଟଗୁଡ଼ିକ ଏଠାରେ ଅଛି! 💰`,
+    budgetNoMatch: (maxPrice) => `ଏହି ବଜେଟ୍ ରେ କୌଣସି ପ୍ରଡକ୍ଟ ମିଳିଲା ନାହିଁ, ଆମର ଅନ୍ୟ ସଂଗ୍ରହ ଦେଖନ୍ତୁ!`,
+    compareSuccess: (n1, n2) => `**${n1}** ଏବଂ **${n2}** ମଧ୍ୟରେ ତୁଳନା ପ୍ରସ୍ତୁତ ଅଛି। ⚖️`,
+    compareSpecify: "ତୁଳନା ପାଇଁ ପ୍ରଡକ୍ଟ ଚୟନ କରନ୍ତୁ। ⚖️",
+    bestIntro: "ଏଗୁଡ଼ିକ ଆମର ସର୍ବୋତ୍ତਮ ପ୍ରଡକ୍ଟ ଅଟେ! ⭐",
+    searchSuccess: (name) => `କ୍ୟାଟାଲଗ୍ ରେ **${name}** ପାଇଁ ପ୍ରଡକ୍ଟ ମିଳିଛି! 🚀`,
+    welcome: `ବାଲାଜୀମାର୍ଟରେ ଆପଣଙ୍କୁ ସ୍ୱାગତ! ଆପଣ ପ୍ରଡକ୍ଟକୁ **"ତୁଳନା"** କରିପାରିବେ। 🤖`,
+    voiceSearch: (count, text) => `"${text}" ପାଇଁ ${count} ଟି ପ୍ରଡକ୍ଟ ମିଳିଛି। ଏହାକୁ ଦେଖନ୍ତು!`
+  },
+  ur: {
+    addToCartSuccess: (name) => `میں نے **${name}** کو آپ کے کارٹ میں شامل کر دیا ہے۔ check out کے لیے کارٹ کھولیں! 🛒`,
+    addToCartSpecify: "آپ کون سا پروڈکٹ شامل کرنا چاہتے ہیں؟ براہ کرم پروڈکٹ کا صحیح نام بتائیں! 🛍️",
+    budgetSuccess: (maxPrice) => `آپ کے بجٹ **₹${maxPrice.toLocaleString()}** کے لیے بہترین پروڈکٹس یہ ہیں! 💰`,
+    budgetNoMatch: (maxPrice) => `اس بجٹ میں کوئی پروڈکٹ نہیں ملی، لیکن آپ ہمارا کلیکشن دیکھ سکتے ہیں!`,
+    compareSuccess: (n1, n2) => `**${n1}** اور **${n2}** کا موازنہ تیار ہے۔ ⚖️`,
+    compareSpecify: "موازنہ کرنے کے لیے پروڈکٹس منتخب کریں۔ ⚖️",
+    bestIntro: "یہ ہمارے بہترین پروڈکٹس ہیں! ⭐",
+    searchSuccess: (name) => `کیٹلاگ میں **${name}** کے لیے مصنوعات مل گئیں! 🚀`,
+    welcome: `بالاجی مارٹ میں خوش آمدید! آپ مصنوعات کا **"موازنہ"** کر سکتے ہیں۔ 🤖`,
+    voiceSearch: (count, text) => `"${text}" کے لیے ${count} پروڈکٹس ملیں۔ انہیں دیکھیں!`
+  }
+};
+
 // ─── QUICK SUGGESTION PILLS ───────────────────────────────────────────────────
 const QUICK_SUGGESTIONS = [
   { label: '🔥 Best deals today', msg: 'Best deals dikhao aaj ke' },
@@ -418,7 +585,9 @@ const AISalesman = () => {
 
         if (isSpeakerOn) {
           const count = res.data.products?.length || 0;
-          speakText(`${count} products found for "${transcript}". Check them out!`);
+          const lang = detectLanguageCode(transcript);
+          const voiceResp = LOCALIZED_RESPONSES[lang] || LOCALIZED_RESPONSES.en;
+          speakText(voiceResp.voiceSearch(count, transcript));
         }
       }
     } catch (err) {
@@ -439,7 +608,9 @@ const AISalesman = () => {
 
       if (isSpeakerOn) {
         const count = matched.length;
-        speakText(`${count} products found for "${transcript}". Check them out!`);
+        const lang = detectLanguageCode(transcript);
+        const voiceResp = LOCALIZED_RESPONSES[lang] || LOCALIZED_RESPONSES.en;
+        speakText(voiceResp.voiceSearch(count, transcript));
       }
     } finally {
       setIsVoiceSearching(false);
@@ -495,9 +666,11 @@ const AISalesman = () => {
         setIsLoading(false);
       }
     } catch (err) {
-      // 200% Working Client-side AI parser fallback when API is unavailable
       const query = msgText.toLowerCase();
-      let reply = "I am checking filters for your request! 😊";
+      const lang = detectLanguageCode(msgText);
+      const resp = LOCALIZED_RESPONSES[lang] || LOCALIZED_RESPONSES.en;
+
+      let reply = resp.welcome;
       let emotion = "neutral";
       let productCard = null;
       let suggestedProducts = [];
@@ -509,50 +682,50 @@ const AISalesman = () => {
         (p.tags && p.tags.some(t => query.includes(t.toLowerCase())))
       );
       
-      if (query.includes("cart") && (query.includes("add") || query.includes("daal") || query.includes("put"))) {
+      if (query.includes("cart") && (query.includes("add") || query.includes("daal") || query.includes("put") || query.includes("যোগ") || query.includes("add to cart"))) {
         const target = products.find(p => query.includes(p.name?.toLowerCase()) || p.tags?.some(t => query.includes(t.toLowerCase())));
         if (target) {
-          reply = `I have added **${target.name}** to your cart. Please open the cart to checkout! 🛒`;
+          reply = resp.addToCartSuccess(target.name);
           emotion = "excited";
           cartAction = { type: "add_to_cart", product_id: target.id || target._id };
           productCard = target;
         } else {
-          reply = "Which item would you like to add? Please specify the correct product name! 🛍️";
+          reply = resp.addToCartSpecify;
           emotion = "needs_guidance";
         }
-      } else if (query.includes("sasta") || query.includes("budget") || query.includes("under") || query.includes("kam price") || query.includes("cheap")) {
+      } else if (query.includes("sasta") || query.includes("budget") || query.includes("under") || query.includes("kam price") || query.includes("cheap") || query.includes("बजेट") || query.includes("छাড়")) {
         emotion = "budget_conscious";
         const numbers = query.match(/\d+/g);
         const maxPrice = numbers ? Number(numbers[0]) : 3000;
         const budgetMatches = products.filter(p => Number(p.price) <= maxPrice).slice(0, 3);
         
         if (budgetMatches.length > 0) {
-          reply = `Here are the best matching products within your budget of **₹${maxPrice.toLocaleString()}**! 💰`;
+          reply = resp.budgetSuccess(maxPrice);
           suggestedProducts = budgetMatches;
         } else {
-          reply = `No exact matches found in the ₹${maxPrice.toLocaleString()} range, but feel free to explore our collections!`;
+          reply = resp.budgetNoMatch(maxPrice);
         }
-      } else if (query.includes("compare") || query.includes("difference") || query.includes("antar")) {
+      } else if (query.includes("compare") || query.includes("difference") || query.includes("antar") || query.includes("বনাম") || query.includes("তুলনা")) {
         emotion = "comparing";
         const compareMatches = products.slice(0, 2);
         if (compareMatches.length >= 2) {
-          reply = `I can check that! The comparison between **${compareMatches[0].name}** and **${compareMatches[1].name}** is ready. ⚖️`;
+          reply = resp.compareSuccess(compareMatches[0].name, compareMatches[1].name);
           suggestedProducts = compareMatches;
         } else {
-          reply = "Select specs to compare laptops or mobile devices. ⚖️";
+          reply = resp.compareSpecify;
         }
-      } else if (query.includes("best") || query.includes("top rated") || query.includes("star") || query.includes("quality")) {
+      } else if (query.includes("best") || query.includes("top rated") || query.includes("star") || query.includes("quality") || query.includes("সেরা")) {
         emotion = "excited";
         const highRated = [...products].sort((a, b) => b.ratings - a.ratings).slice(0, 3);
-        reply = "These are the Top Rated and Highly Recommended premium products in our catalog! ⭐";
+        reply = resp.bestIntro;
         suggestedProducts = highRated;
       } else if (matched.length > 0) {
         emotion = "excited";
-        reply = `I found matching products and recommendations for **${matched[0].name}** in the catalog! 🚀`;
+        reply = resp.searchSuccess(matched[0].name);
         productCard = matched[0];
         suggestedProducts = matched.slice(1, 3);
       } else {
-        reply = `Welcome to Balaji Mart! You can ask to **"compare"**, search **"affordable products"**, or find **"laptops under ₹50,000"** and I will get instant results for you! 🤖`;
+        reply = resp.welcome;
       }
       
       setTimeout(() => {
