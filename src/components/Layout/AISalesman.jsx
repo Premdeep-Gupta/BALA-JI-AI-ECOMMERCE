@@ -166,7 +166,7 @@ const VoiceResultsPanel = ({ results, intent, transcript, onAddToCart, onClose }
     initial={{ opacity: 0, scale: 0.95, y: 20 }}
     animate={{ opacity: 1, scale: 1, y: 0 }}
     exit={{ opacity: 0, scale: 0.95 }}
-    className="fixed bottom-24 right-6 w-[380px] bg-[#0d0d18] border border-indigo-500/30 rounded-3xl shadow-2xl z-50 overflow-hidden"
+    className="ai-salesman-panel fixed bottom-24 right-6 w-[380px] bg-[#0d0d18] border border-indigo-500/30 rounded-3xl shadow-2xl z-50 overflow-hidden"
     style={{ boxShadow: '0 0 60px rgba(99,102,241,0.2)' }}
   >
     <div className="p-4 border-b border-white/10 flex items-center justify-between">
@@ -596,7 +596,7 @@ const AISalesman = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 60, scale: 0.92 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed bottom-6 right-6 w-[360px] sm:w-[420px] h-[620px] z-50 flex flex-col rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
+            className="ai-salesman-panel fixed bottom-6 right-6 w-[360px] sm:w-[420px] h-[620px] z-50 flex flex-col rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
             style={{
               background: 'linear-gradient(145deg, #0d0d18 0%, #0f0f20 100%)',
               boxShadow: '0 0 80px rgba(99,102,241,0.15), 0 30px 60px rgba(0,0,0,0.8)',

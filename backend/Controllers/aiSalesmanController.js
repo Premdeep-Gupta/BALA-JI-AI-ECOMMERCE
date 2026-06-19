@@ -58,14 +58,17 @@ const parseVoiceQuery = (msg) => {
   const lower = msg.toLowerCase();
   let category = null, maxPrice = null, color = null, keyword = null;
 
-  // Category detection
+  // Category detection for all 9 categories in database
   if (/shoes|chappal|footwear|boot/.test(lower)) category = 'Footwear';
-  else if (/phone|mobile|smartphone|iphone/.test(lower)) category = 'Electronics';
-  else if (/laptop|computer|pc/.test(lower)) category = 'Electronics';
-  else if (/shirt|kurta|saree|dress|clothes|fashion|kapde/.test(lower)) category = 'Fashion';
-  else if (/sofa|furniture|chair|table/.test(lower)) category = 'Home & Living';
-  else if (/watch|ghadi/.test(lower)) category = 'Accessories';
-  else if (/headphone|earphone|speaker/.test(lower)) category = 'Electronics';
+  else if (/phone|mobile|smartphone|iphone|android|samsung|oneplus/.test(lower)) category = 'Mobiles';
+  else if (/laptop|computer|pc|television|tv|fridge|refrigerator|washing machine|ac|air conditioner|electronics|gadget/.test(lower)) category = 'Electronics';
+  else if (/shirt|kurta|saree|dress|clothes|fashion|kapde|jeans|tshirt/.test(lower)) category = 'Fashion';
+  else if (/sofa|furniture|chair|table|bed|curtain/.test(lower)) category = 'Home & Living';
+  else if (/watch|ghadi|necklace|ring|bag|backpack/.test(lower)) category = 'Accessories';
+  else if (/book|novel|comic|read|author|literature/.test(lower)) category = 'Books';
+  else if (/sports|bat|ball|cricket|football|gym|exercise|fitness|badminton/.test(lower)) category = 'Sports';
+  else if (/car|bike|motorcycle|helmet|automotive|tyre|cleaner|car wax/.test(lower)) category = 'Automotive';
+  else if (/grocery|food|snack|oil|biscuit|shampoo|soap|paste/.test(lower)) category = 'Grocery';
 
   // Price detection — "under 2000", "2000 se kam", "budget 5000"
   const priceMatch = lower.match(/(?:under|below|upto|within|budget|se kam|tak)\s*(?:rs\.?|₹)?\s*(\d[\d,]*)/i);
@@ -249,25 +252,28 @@ export const chatWithSalesman = catchAsyncErrors(async (req, res, next) => {
   }
 
   try {
-    // 1. Detect emotion and intent
+    // 1. Detect emotion and intent (parse intent for BOTH text and voice queries)
     const emotion = detectEmotion(message);
-    const voiceIntent = isVoiceQuery ? parseVoiceQuery(message) : null;
+    const voiceIntent = parseVoiceQuery(message);
 
     // 2. Build smart product query based on intent
     let productQuery = "SELECT id, name, category, price, stock, ratings, description FROM products WHERE stock > 0";
     const queryParams = [];
 
     if (voiceIntent?.category) {
-      queryParams.push(voiceIntent.category);
+      queryParams.push(`%${voiceIntent.category.toLowerCase()}%`);
       productQuery += ` AND LOWER(category) ILIKE $${queryParams.length}`;
-      queryParams[queryParams.length - 1] = `%${voiceIntent.category.toLowerCase()}%`;
     }
     if (voiceIntent?.maxPrice) {
       queryParams.push(voiceIntent.maxPrice);
       productQuery += ` AND price <= $${queryParams.length}`;
     }
-    if (voiceIntent?.keyword && !voiceIntent?.category) {
-      queryParams.push(`%${voiceIntent.keyword}%`);
+    if (voiceIntent?.keyword) {
+      queryParams.push(`%${voiceIntent.keyword.toLowerCase()}%`);
+      productQuery += ` AND (LOWER(name) ILIKE $${queryParams.length} OR LOWER(description) ILIKE $${queryParams.length} OR LOWER(category) ILIKE $${queryParams.length})`;
+    }
+    if (voiceIntent?.color) {
+      queryParams.push(`%${voiceIntent.color.toLowerCase()}%`);
       productQuery += ` AND (LOWER(name) ILIKE $${queryParams.length} OR LOWER(description) ILIKE $${queryParams.length})`;
     }
     if (emotion === 'budget_conscious') {
@@ -277,7 +283,30 @@ export const chatWithSalesman = catchAsyncErrors(async (req, res, next) => {
     }
     productQuery += " LIMIT 15";
 
-    const productRes = await database.query(productQuery, queryParams.length > 0 ? queryParams : undefined);
+    let productRes = await database.query(productQuery, queryParams.length > 0 ? queryParams : undefined);
+
+    // Broader search retry if no results were found matching restrictive filters
+    if (productRes.rows.length === 0 && voiceIntent?.keyword) {
+      let broadQuery = "SELECT id, name, category, price, stock, ratings, description FROM products WHERE stock > 0";
+      const broadParams = [];
+      broadParams.push(`%${voiceIntent.keyword.toLowerCase()}%`);
+      broadQuery += ` AND (LOWER(name) ILIKE $${broadParams.length} OR LOWER(description) ILIKE $${broadParams.length})`;
+      if (voiceIntent?.maxPrice) {
+        broadParams.push(voiceIntent.maxPrice);
+        broadQuery += ` AND price <= $${broadParams.length}`;
+      }
+      broadQuery += " ORDER BY ratings DESC LIMIT 15";
+      const broadRes = await database.query(broadQuery, broadParams);
+      if (broadRes.rows.length > 0) {
+        productRes = broadRes;
+      }
+    }
+
+    // Ultimate fallback if still no results found
+    if (productRes.rows.length === 0) {
+      const fallbackRes = await database.query("SELECT id, name, category, price, stock, ratings, description FROM products WHERE stock > 0 ORDER BY ratings DESC LIMIT 15");
+      productRes = fallbackRes;
+    }
     const productContext = productRes.rows
       .map(p => `ID:${p.id} | ${p.name} | ${p.category} | ₹${p.price} | ⭐${p.ratings || '4.0'}`)
       .join('\n');
@@ -407,14 +436,32 @@ export const voiceSearch = catchAsyncErrors(async (req, res, next) => {
     queryParams.push(intent.maxPrice);
     productQuery += ` AND price <= $${queryParams.length}`;
   }
-  if (intent.keyword && !intent.category) {
-    queryParams.push(`%${intent.keyword}%`);
+  if (intent.keyword) {
+    queryParams.push(`%${intent.keyword.toLowerCase()}%`);
+    productQuery += ` AND (LOWER(name) ILIKE $${queryParams.length} OR LOWER(description) ILIKE $${queryParams.length} OR LOWER(category) ILIKE $${queryParams.length})`;
+  }
+  if (intent.color) {
+    queryParams.push(`%${intent.color.toLowerCase()}%`);
     productQuery += ` AND (LOWER(name) ILIKE $${queryParams.length} OR LOWER(description) ILIKE $${queryParams.length})`;
   }
 
   productQuery += " ORDER BY ratings DESC LIMIT 8";
 
-  const result = await database.query(productQuery, queryParams.length > 0 ? queryParams : undefined);
+  let result = await database.query(productQuery, queryParams.length > 0 ? queryParams : undefined);
+
+  // Broad fallback retry matching just the keyword
+  if (result.rows.length === 0 && intent.keyword) {
+    let broadQuery = "SELECT id, name, category, price, stock, ratings, images FROM products WHERE stock > 0";
+    const broadParams = [];
+    broadParams.push(`%${intent.keyword.toLowerCase()}%`);
+    broadQuery += ` AND (LOWER(name) ILIKE $${broadParams.length} OR LOWER(description) ILIKE $${broadParams.length})`;
+    if (intent.maxPrice) {
+      broadParams.push(intent.maxPrice);
+      broadQuery += ` AND price <= $${broadParams.length}`;
+    }
+    broadQuery += " ORDER BY ratings DESC LIMIT 8";
+    result = await database.query(broadQuery, broadParams);
+  }
 
   res.status(200).json({
     success: true,

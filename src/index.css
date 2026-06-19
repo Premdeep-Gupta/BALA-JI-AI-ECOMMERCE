@@ -840,3 +840,100 @@
 .dark .search-engine-panel input::placeholder {
   color: #64748b !important;
 }
+
+/* ============================================================
+   AURA CHATBOT - PREMIUM DARK GLASSRESET OVERRIDES
+   Exempts chatbot panel from global Light/Wine/Dark theme overrides
+   ============================================================ */
+.ai-salesman-panel,
+.light .ai-salesman-panel,
+.wine .ai-salesman-panel,
+.dark .ai-salesman-panel {
+  background: linear-gradient(135deg, rgba(13, 13, 24, 0.95) 0%, rgba(15, 15, 32, 0.98) 100%) !important;
+  color: #f1f5f9 !important;
+}
+
+/* Force text visibility */
+.light .ai-salesman-panel .text-white,
+.wine .ai-salesman-panel .text-white,
+.dark .ai-salesman-panel .text-white,
+.light .ai-salesman-panel span.text-white,
+.wine .ai-salesman-panel span.text-white,
+.dark .ai-salesman-panel span.text-white,
+.light .ai-salesman-panel p.text-white,
+.wine .ai-salesman-panel p.text-white,
+.dark .ai-salesman-panel p.text-white,
+.light .ai-salesman-panel div.text-white,
+.wine .ai-salesman-panel div.text-white,
+.dark .ai-salesman-panel div.text-white,
+.light .ai-salesman-panel strong,
+.wine .ai-salesman-panel strong,
+.dark .ai-salesman-panel strong {
+  color: #ffffff !important;
+}
+
+.light .ai-salesman-panel h1, .light .ai-salesman-panel h2, .light .ai-salesman-panel h3, .light .ai-salesman-panel h4, .light .ai-salesman-panel h5,
+.wine .ai-salesman-panel h1, .wine .ai-salesman-panel h2, .wine .ai-salesman-panel h3, .wine .ai-salesman-panel h4, .wine .ai-salesman-panel h5,
+.dark .ai-salesman-panel h1, .dark .ai-salesman-panel h2, .dark .ai-salesman-panel h3, .dark .ai-salesman-panel h4, .dark .ai-salesman-panel h5 {
+  color: #ffffff !important;
+}
+
+/* Slate texts resets */
+.light .ai-salesman-panel .text-slate-100, .wine .ai-salesman-panel .text-slate-100, .dark .ai-salesman-panel .text-slate-100 { color: #f1f5f9 !important; }
+.light .ai-salesman-panel .text-slate-200, .wine .ai-salesman-panel .text-slate-200, .dark .ai-salesman-panel .text-slate-200 { color: #e2e8f0 !important; }
+.light .ai-salesman-panel .text-slate-300, .wine .ai-salesman-panel .text-slate-300, .dark .ai-salesman-panel .text-slate-300 { color: #cbd5e1 !important; }
+.light .ai-salesman-panel .text-slate-350, .wine .ai-salesman-panel .text-slate-350, .dark .ai-salesman-panel .text-slate-350 { color: #cbd5e1 !important; }
+.light .ai-salesman-panel .text-slate-400, .wine .ai-salesman-panel .text-slate-400, .dark .ai-salesman-panel .text-slate-400 { color: #94a3b8 !important; }
+.light .ai-salesman-panel .text-slate-500, .wine .ai-salesman-panel .text-slate-500, .dark .ai-salesman-panel .text-slate-500 { color: #64748b !important; }
+.light .ai-salesman-panel .text-slate-600, .wine .ai-salesman-panel .text-slate-600, .dark .ai-salesman-panel .text-slate-600 { color: #475569 !important; }
+
+/* Gray resets */
+.light .ai-salesman-panel .text-gray-300, .wine .ai-salesman-panel .text-gray-300, .dark .ai-salesman-panel .text-gray-300,
+.light .ai-salesman-panel .text-gray-400, .wine .ai-salesman-panel .text-gray-400, .dark .ai-salesman-panel .text-gray-400 { color: #cbd5e1 !important; }
+.light .ai-salesman-panel .text-gray-500, .wine .ai-salesman-panel .text-gray-500, .dark .ai-salesman-panel .text-gray-500 { color: #64748b !important; }
+
+/* Indigo resets for high-contrast visibility on dark bg */
+.light .ai-salesman-panel .text-indigo-300, .wine .ai-salesman-panel .text-indigo-300 {
+  color: #a5b4fc !important;
+}
+.light .ai-salesman-panel .text-indigo-400, .wine .ai-salesman-panel .text-indigo-400 {
+  color: #818cf8 !important;
+}
+
+/* Force background reset on elements */
+.light .ai-salesman-panel .bg-slate-950\/60, .wine .ai-salesman-panel .bg-slate-950\/60, .dark .ai-salesman-panel .bg-slate-950\/60,
+.light .ai-salesman-panel .bg-slate-950\/80, .wine .ai-salesman-panel .bg-slate-950\/80, .dark .ai-salesman-panel .bg-slate-950\/80 {
+  background-color: rgba(2, 6, 23, 0.6) !important;
+}
+.light .ai-salesman-panel .bg-slate-950\/20, .wine .ai-salesman-panel .bg-slate-950\/20, .dark .ai-salesman-panel .bg-slate-950\/20 {
+  background-color: rgba(2, 6, 23, 0.2) !important;
+}
+.light .ai-salesman-panel .bg-slate-950\/25, .wine .ai-salesman-panel .bg-slate-950\/25, .dark .ai-salesman-panel .bg-slate-950\/25 {
+  background-color: rgba(2, 6, 23, 0.25) !important;
+}
+.light .ai-salesman-panel .bg-white\/5, .wine .ai-salesman-panel .bg-white\/5, .dark .ai-salesman-panel .bg-white\/5,
+.light .ai-salesman-panel .bg-white\/8, .wine .ai-salesman-panel .bg-white\/8, .dark .ai-salesman-panel .bg-white\/8 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Override inner container wildcard styles that force dark colors */
+.light .ai-salesman-panel .bg-white\/5 *,
+.light .ai-salesman-panel .bg-white\/8 *,
+.wine .ai-salesman-panel .bg-white\/5 *,
+.wine .ai-salesman-panel .bg-white\/8 * {
+  color: inherit;
+}
+
+/* Specific resets for search inputs in panel */
+.light .ai-salesman-panel input,
+.wine .ai-salesman-panel input,
+.dark .ai-salesman-panel input {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+.light .ai-salesman-panel input::placeholder,
+.wine .ai-salesman-panel input::placeholder,
+.dark .ai-salesman-panel input::placeholder {
+  color: #64748b !important;
+}
