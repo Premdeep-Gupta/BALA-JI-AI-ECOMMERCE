@@ -691,7 +691,7 @@ const AISalesman = () => {
         (p.tags && p.tags.some(t => query.includes(t.toLowerCase())))
       );
       
-      if (query.includes("cart") && (query.includes("add") || query.includes("daal") || query.includes("put") || query.includes("যোগ") || query.includes("add to cart"))) {
+      if (/(cart|add|put|insert|daal|dal|jod|যোগ|சேர்|జోడించు|సೇರಿಸಿ|ചേർക്കുക|ઉમેરો|ਜੋੜੋ|ଯୋଡ଼ନ୍ତು|شامل)/i.test(query)) {
         const target = products.find(p => query.includes(p.name?.toLowerCase()) || p.tags?.some(t => query.includes(t.toLowerCase())));
         if (target) {
           reply = resp.addToCartSuccess(target.name);
@@ -702,7 +702,7 @@ const AISalesman = () => {
           reply = resp.addToCartSpecify;
           emotion = "needs_guidance";
         }
-      } else if (query.includes("sasta") || query.includes("budget") || query.includes("under") || query.includes("kam price") || query.includes("cheap") || query.includes("बजेट") || query.includes("छাড়")) {
+      } else if (/(budget|discount|offer|under|cheap|price|coupon|sasta|kam|chhoot|बजेट|छাড়|কম দাম|மலிவான|தள்ளுபடி|பட்ஜெட்|తగ్గింపు|చౌక|ರಿಯಾಯಿತಿ|ಅಗ್ಗ|കിഴിവ്|വിലകുറഞ്ഞ|સસ્તું|ਛੋਟ|ਸਸਤਾ|ରିହାତି|ଶସ୍ତା|رعایت)/i.test(query)) {
         emotion = "budget_conscious";
         const numbers = query.match(/\d+/g);
         const maxPrice = numbers ? Number(numbers[0]) : 3000;
@@ -714,7 +714,7 @@ const AISalesman = () => {
         } else {
           reply = resp.budgetNoMatch(maxPrice);
         }
-      } else if (query.includes("compare") || query.includes("difference") || query.includes("antar") || query.includes("বনাম") || query.includes("তুলনা")) {
+      } else if (/(compare|vs|versus|difference|better|antar|farq|fark|tulna|বনাম|তুলনা|পার্থক্য|ஒப்பிடு|வித்தியாசம்|పోల్చండి|తేడా|ಹೋಲಿಸಿ|ವ್ಯತ್ಯಾಸ|താരതമ്യം|വ്യത്യാസം|સરખામણી|તફાવત|ਅੰਤਰ|ପାର୍ଥକ୍ୟ|موازنہ|فرق)/i.test(query)) {
         emotion = "comparing";
         const compareMatches = products.slice(0, 2);
         if (compareMatches.length >= 2) {
@@ -723,7 +723,7 @@ const AISalesman = () => {
         } else {
           reply = resp.compareSpecify;
         }
-      } else if (query.includes("best") || query.includes("top rated") || query.includes("star") || query.includes("quality") || query.includes("সেরা")) {
+      } else if (/(best|top|star|recommended|highly rated|बढ़िया|अच्छा|সেরা|সবচেয়ে ভালো|சிறந்த|முதல்|ఉత్తమ|అత్యುತ್ತమ|മികച്ച|ശ്രേഷ്ഠ|ਵਧੀਆ|ਉੱਤਮ|ସର୍ବୋତ୍ତମ|بہترین)/i.test(query)) {
         emotion = "excited";
         const highRated = [...products].sort((a, b) => b.ratings - a.ratings).slice(0, 3);
         reply = resp.bestIntro;

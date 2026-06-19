@@ -629,7 +629,7 @@ const generateLocalFallbackResponse = (message, emotion, products) => {
   }
 
   // 2. Intent checks
-  if (query.includes("cart") && (query.includes("add") || query.includes("daal") || query.includes("put") || query.includes("insert") || query.includes("যোগ") || query.includes("add to cart"))) {
+  if (/(cart|add|put|insert|daal|dal|jod|যোগ|சேர்|జోడించు|ಸೇರಿಸಿ|ചേർക്കുക|ઉમેરો|ਜੋੜੋ|ଯୋଡ଼ନ୍ତು|شامل)/i.test(query)) {
     const target = matched[0] || products.find(p => query.includes(p.name?.toLowerCase()));
     if (target) {
       reply = resp.addToCartSuccess(target.name);
@@ -640,7 +640,7 @@ const generateLocalFallbackResponse = (message, emotion, products) => {
     }
   } 
   // Comparison Intent (Detailed comparison with verdict)
-  else if (query.includes("compare") || query.includes("vs") || query.includes("antar") || query.includes("difference") || query.includes("difference between") || query.includes("বনাম") || query.includes("তুলনা")) {
+  else if (/(compare|vs|versus|difference|better|antar|farq|fark|tulna|বনাম|তুলনা|পার্থক্য|ஒப்பிடு|வித்தியாசம்|పోల్చండి|తేడా|ಹೋಲಿಸಿ|ವ್ಯತ್ಯಾಸ|തารതമ്യം|വ്യത്യാസം|સરખામણી|તફાવત|ਅੰਤਰ|ପାର୍ଥକ୍ୟ|موازنہ|فرق)/i.test(query)) {
     const compareList = [];
     
     // Match named products in query if possible
@@ -678,7 +678,7 @@ const generateLocalFallbackResponse = (message, emotion, products) => {
     }
   }
   // Budget & Offers Intent
-  else if (query.includes("sasta") || query.includes("budget") || query.includes("discount") || query.includes("offer") || query.includes("under") || query.includes("kam price") || query.includes("coupon") || query.includes("price") || query.includes("বাজেট") || query.includes("ছাড়")) {
+  else if (/(budget|discount|offer|under|cheap|price|coupon|sasta|kam|chhoot|बजेट|छাড়|কম দাম|மலிவான|தள்ளுபடி|பட்ஜெட்|తగ్గింపు|చౌక|ರಿಯಾಯಿತಿ|ಅಗ್ಗ|കിഴിവ്|വിലകുറഞ്ഞ|સસ્તું|ਛੋਟ|ਸਸਤਾ|ରିହାତି|ଶସ୍ତା|رعایت)/i.test(query)) {
     const numbers = query.match(/\d+/g);
     const maxPrice = numbers ? Number(numbers[0]) : 5000;
     
@@ -695,7 +695,7 @@ const generateLocalFallbackResponse = (message, emotion, products) => {
     suggestedProducts = budgetMatches.map(p => ({ id: p.id, name: p.name, price: p.price, category: p.category, images: p.images }));
   } 
   // Ask about product details / product opinion
-  else if (matched.length > 0 && (query.includes("kaisa") || query.includes("about") || query.includes("review") || query.includes("opinion") || query.includes("puch") || query.includes("tell me") || query.includes("information") || query.includes("achha") || query.includes("কেমন") || query.includes("রিভিউ"))) {
+  else if (matched.length > 0 && /(about|review|opinion|details|info|information|kaisa|के बारे|केमन|রিভিউ|সম্পর্কে|எப்படி|விவரங்கள்|ఎలా|ಹೇಗಿದೆ|ವಿವರಗಳು|എങ്ങനെയുണ്ട്|വിവരങ്ങൾ|કેવું|વિગત|ਕਿਵੇਂ|ਵੇਰਵਾ|କେମିତି|ବିବରଣୀ|کیسا|تفصیلات)/i.test(query)) {
     const target = matched[0];
     const ratingStr = target.ratings ? `⭐${target.ratings}/5` : "highly rated";
     reply = resp.opinionIntro(target.name, target.category, ratingStr);
@@ -703,7 +703,7 @@ const generateLocalFallbackResponse = (message, emotion, products) => {
     suggestedProducts = matched.slice(1, 4).map(p => ({ id: p.id, name: p.name, price: p.price, category: p.category, images: p.images }));
   }
   // Best Products search
-  else if (query.includes("best") || query.includes("top rated") || query.includes("star") || query.includes("high rated") || query.includes("সেরা")) {
+  else if (/(best|top|star|recommended|highly rated|बढ़िया|अच्छा|সেরা|সবচেয়ে ভালো|சிறந்த|முதல்|ఉత్తమ|అత్యುತ್ತమ|മികച്ച|ശ്രേഷ്ഠ|ਵਧੀਆ|ਉੱਤਮ|ସର୍ବୋତ୍තਮ|بہترین)/i.test(query)) {
     const topRated = [...products].sort((a, b) => (Number(b.ratings) || 0) - (Number(a.ratings) || 0)).slice(0, 3);
     reply = resp.bestIntro;
     suggestedProducts = topRated.map(p => ({ id: p.id, name: p.name, price: p.price, category: p.category, images: p.images }));
