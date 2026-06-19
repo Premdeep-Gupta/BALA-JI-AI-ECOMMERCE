@@ -11,6 +11,7 @@ import {
   fetchAIFilteredProducts,
   fetchSimilarProducts,
   fetchVisualRecommendations,
+  cameraSearch,
 } from "../Controllers/productController.js";
 
 import { handleCameraSearch } from "../Controllers/cameraSearchController.js";
@@ -36,7 +37,7 @@ router.get("/:productId", fetchSingleProduct);
 router.post("/ai/search", fetchAIFilteredProducts);
 
 // Camera/Visual Search
-router.post("/camera-search", handleCameraSearch);
+router.post("/camera-search", cameraSearch);
 
 // Similar Products Visual Search
 router.get("/similar/:productId", fetchSimilarProducts);

@@ -249,13 +249,11 @@ const resolveAlias = (query) => {
   const q = query.toLowerCase().trim();
   // Check for direct match
   if (ALIAS_MAP[q]) return ALIAS_MAP[q];
-  // Check for partial match (word starts with alias key)
+  
+  // Split query into words to match whole words only (prevents substring matching like "ac" in "black")
+  const words = q.split(/\s+/);
   for (const [alias, resolved] of Object.entries(ALIAS_MAP)) {
-    if (q.includes(alias)) return resolved;
-    // Phonetic similarity: first 3 chars match
-    if (alias.length > 3 && q.length > 3 && q.slice(0, 3) === alias.slice(0, 3)) {
-      return resolved;
-    }
+    if (words.includes(alias)) return resolved;
   }
   return null;
 };
