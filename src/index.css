@@ -748,3 +748,95 @@
 .wine .admin-portal-view input::placeholder {
   color: #64748b !important;
 }
+
+/* ============================================================
+   AURA SMART SEARCH ENGINE - PREMIUM DARK GLASSRESET OVERRIDES
+   Exempts search overlay from global Light/Wine/Dark theme overrides
+   ============================================================ */
+.search-engine-panel,
+.light .search-engine-panel,
+.wine .search-engine-panel,
+.dark .search-engine-panel {
+  background: linear-gradient(135deg, rgba(17, 18, 36, 0.85) 0%, rgba(10, 11, 22, 0.98) 100%) !important;
+  color: #ffffff !important;
+}
+
+/* Force text visibility */
+.light .search-engine-panel .text-white,
+.wine .search-engine-panel .text-white,
+.dark .search-engine-panel .text-white,
+.light .search-engine-panel span.text-white,
+.wine .search-engine-panel span.text-white,
+.dark .search-engine-panel span.text-white,
+.light .search-engine-panel p.text-white,
+.wine .search-engine-panel p.text-white,
+.dark .search-engine-panel p.text-white,
+.light .search-engine-panel div.text-white,
+.wine .search-engine-panel div.text-white,
+.dark .search-engine-panel div.text-white {
+  color: #ffffff !important;
+}
+
+.light .search-engine-panel h1, .light .search-engine-panel h2, .light .search-engine-panel h3, .light .search-engine-panel h4, .light .search-engine-panel h5,
+.wine .search-engine-panel h1, .wine .search-engine-panel h2, .wine .search-engine-panel h3, .wine .search-engine-panel h4, .wine .search-engine-panel h5,
+.dark .search-engine-panel h1, .dark .search-engine-panel h2, .dark .search-engine-panel h3, .dark .search-engine-panel h4, .dark .search-engine-panel h5 {
+  color: #ffffff !important;
+}
+
+/* Slate texts resets */
+.light .search-engine-panel .text-slate-100, .wine .search-engine-panel .text-slate-100, .dark .search-engine-panel .text-slate-100 { color: #f1f5f9 !important; }
+.light .search-engine-panel .text-slate-200, .wine .search-engine-panel .text-slate-200, .dark .search-engine-panel .text-slate-200 { color: #e2e8f0 !important; }
+.light .search-engine-panel .text-slate-300, .wine .search-engine-panel .text-slate-300, .dark .search-engine-panel .text-slate-300 { color: #cbd5e1 !important; }
+.light .search-engine-panel .text-slate-400, .wine .search-engine-panel .text-slate-400, .dark .search-engine-panel .text-slate-400 { color: #94a3b8 !important; }
+.light .search-engine-panel .text-slate-505, .wine .search-engine-panel .text-slate-505, .dark .search-engine-panel .text-slate-505 { color: #64748b !important; }
+.light .search-engine-panel .text-slate-500, .wine .search-engine-panel .text-slate-500, .dark .search-engine-panel .text-slate-500 { color: #64748b !important; }
+.light .search-engine-panel .text-slate-600, .wine .search-engine-panel .text-slate-600, .dark .search-engine-panel .text-slate-600 { color: #475569 !important; }
+
+/* Gray resets */
+.light .search-engine-panel .text-gray-300, .wine .search-engine-panel .text-gray-300, .dark .search-engine-panel .text-gray-300,
+.light .search-engine-panel .text-gray-400, .wine .search-engine-panel .text-gray-400, .dark .search-engine-panel .text-gray-400 { color: #cbd5e1 !important; }
+.light .search-engine-panel .text-gray-555, .wine .search-engine-panel .text-gray-555, .dark .search-engine-panel .text-gray-555,
+.light .search-engine-panel .text-gray-500, .wine .search-engine-panel .text-gray-500, .dark .search-engine-panel .text-gray-500 { color: #64748b !important; }
+
+/* Force background reset on elements */
+.light .search-engine-panel .bg-slate-950\/60,
+.wine .search-engine-panel .bg-slate-950\/60,
+.dark .search-engine-panel .bg-slate-950\/60,
+.light .search-engine-panel .bg-slate-950\/80,
+.wine .search-engine-panel .bg-slate-950\/80,
+.dark .search-engine-panel .bg-slate-950\/80 {
+  background-color: rgba(2, 6, 23, 0.6) !important;
+}
+
+.light .search-engine-panel .bg-slate-950\/20,
+.wine .search-engine-panel .bg-slate-950\/20,
+.dark .search-engine-panel .bg-slate-950\/20 {
+  background-color: rgba(2, 6, 23, 0.2) !important;
+}
+
+.light .search-engine-panel .bg-slate-950\/25,
+.wine .search-engine-panel .bg-slate-950\/25,
+.dark .search-engine-panel .bg-slate-950\/25 {
+  background-color: rgba(2, 6, 23, 0.25) !important;
+}
+
+.light .search-engine-panel .bg-white\/5,
+.wine .search-engine-panel .bg-white\/5,
+.dark .search-engine-panel .bg-white\/5 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Specific resets for search inputs in panel */
+.light .search-engine-panel input,
+.wine .search-engine-panel input,
+.dark .search-engine-panel input {
+  color: #ffffff !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+.light .search-engine-panel input::placeholder,
+.wine .search-engine-panel input::placeholder,
+.dark .search-engine-panel input::placeholder {
+  color: #64748b !important;
+}

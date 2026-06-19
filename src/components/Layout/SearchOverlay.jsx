@@ -835,7 +835,7 @@ const SearchOverlay = () => {
           transition={{ duration: 0.22, ease: "easeOut" }}
         >
           {/* ── MAIN SEARCH CARD ── */}
-          <div className="relative rounded-[24px] overflow-hidden border border-white/[0.08] backdrop-blur-[24px] shadow-[0_30px_100px_rgba(0,0,0,0.85),_0_0_50px_rgba(99,102,241,0.1)] bg-slate-900/75"
+          <div className="search-engine-panel relative rounded-[24px] overflow-hidden border border-white/[0.08] backdrop-blur-[24px] shadow-[0_30px_100px_rgba(0,0,0,0.85),_0_0_50px_rgba(99,102,241,0.1)] bg-slate-900/75"
             style={{
               background: "linear-gradient(135deg, rgba(17, 18, 36, 0.8) 0%, rgba(10, 11, 22, 0.95) 100%)",
             }}
