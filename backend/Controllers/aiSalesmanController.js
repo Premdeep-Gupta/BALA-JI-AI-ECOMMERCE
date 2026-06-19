@@ -53,9 +53,22 @@ const detectEmotion = (msg) => {
   return 'neutral';
 };
 
+// ─── QUERY NORMALIZER (handles Hinglish typos) ────────────────────────────────
+const normalizeQueryText = (msg) => {
+  if (!msg) return "";
+  return msg.toLowerCase()
+    .replace(/sumsung|samsang|sumsang|samsong/g, 'samsung')
+    .replace(/iphon\b|ipone/g, 'iphone')
+    .replace(/leptop|laptep|lapy/g, 'laptop')
+    .replace(/mobaile|mobail/g, 'mobile')
+    .replace(/shus|juta|jute/g, 'shoes')
+    .replace(/sare\b|sari/g, 'saree');
+};
+
 // ─── VOICE QUERY PARSER ───────────────────────────────────────────────────────
 const parseVoiceQuery = (msg) => {
-  const lower = msg.toLowerCase();
+  const normalized = normalizeQueryText(msg);
+  const lower = normalized.toLowerCase();
   let category = null, maxPrice = null, color = null, keyword = null;
 
   // Category detection for all 9 categories in database
@@ -70,9 +83,19 @@ const parseVoiceQuery = (msg) => {
   else if (/car|bike|motorcycle|helmet|automotive|tyre|cleaner|car wax/.test(lower)) category = 'Automotive';
   else if (/grocery|food|snack|oil|biscuit|shampoo|soap|paste/.test(lower)) category = 'Grocery';
 
-  // Price detection — "under 2000", "2000 se kam", "budget 5000"
+  // Price detection — "under 2000", "2000 se kam", "budget 5000", or raw numbers (e.g. 20000)
   const priceMatch = lower.match(/(?:under|below|upto|within|budget|se kam|tak)\s*(?:rs\.?|₹)?\s*(\d[\d,]*)/i);
-  if (priceMatch) maxPrice = parseInt(priceMatch[1].replace(/,/g, ''));
+  if (priceMatch) {
+    maxPrice = parseInt(priceMatch[1].replace(/,/g, ''));
+  } else {
+    const rawNumberMatch = lower.match(/\b\d[\d,]*\b/);
+    if (rawNumberMatch) {
+      const val = parseInt(rawNumberMatch[0].replace(/,/g, ''));
+      if (val >= 100 && val <= 500000) {
+        maxPrice = val;
+      }
+    }
+  }
 
   // Color keyword
   const colorMatch = lower.match(/\b(black|white|red|blue|green|yellow|golden|silver|pink|grey|brown)\b/i);
@@ -80,7 +103,10 @@ const parseVoiceQuery = (msg) => {
 
   // General keyword (noun-ish)
   const words = lower.replace(/[^\w\s]/g, '').split(/\s+/);
-  const stopwords = ['mujhe', 'show', 'dikhao', 'chahiye', 'hai', 'mera', 'under', 'budget', 'best', 'the', 'and', 'or', 'is', 'me', 'ka', 'ki', 'ke', 'se', 'ko', 'ye', 'yeh'];
+  const stopwords = [
+    'mujhe', 'show', 'dikhao', 'chahiye', 'hai', 'mera', 'under', 'budget', 'best', 'the', 'and', 'or', 'is', 'me', 'ka', 'ki', 'ke', 'se', 'ko', 'ye', 'yeh',
+    'dikhan', 'dikhana', 'dikhaye', 'dikhayein', 'dhoondo', 'find', 'search', 'list', 'lelo', 'kharidna', 'purchase', 'le', 'jo', 'ho', 'bhi', 'ek', 'ko', 'bhi', 'kuch', 'aur', 'nhi', 'sahi', 'hona'
+  ];
   keyword = words.find(w => w.length > 3 && !stopwords.includes(w));
 
   return { category, maxPrice, color, keyword };
@@ -88,18 +114,22 @@ const parseVoiceQuery = (msg) => {
 
 // ─── LOCAL FALLBACK NLP REASONING ENGINE (100% ONLINE ALWAYS) ──────────────────
 const generateLocalFallbackResponse = (message, emotion, products) => {
-  const query = message.toLowerCase();
+  const normalized = normalizeQueryText(message);
+  const query = normalized.toLowerCase();
   let reply = "";
   let productCard = null;
   let suggestedProducts = [];
   let cartAction = null;
 
-  const stopwords = ['mujhe', 'show', 'dikhao', 'chahiye', 'hai', 'mera', 'under', 'budget', 'best', 'the', 'and', 'or', 'is', 'me', 'ka', 'ki', 'ke', 'se', 'ko', 'ye', 'yeh', 'prouct', 'product', 'ko', 'bhi', 'achha', 'to', 'dekhao', 'dekhan', 'na', 'kuch', 'aur', 'nhi', 'sahi', 'hona', 'aaye', 'kaisa', 'aisa', 'ek', 'se', 'ho', 'ya', 'koi', 'puchhe', 'bataye', 'kaise', 'sabse', 'jada', 'jyada'];
+  const stopwords = [
+    'mujhe', 'show', 'dikhao', 'chahiye', 'hai', 'mera', 'under', 'budget', 'best', 'the', 'and', 'or', 'is', 'me', 'ka', 'ki', 'ke', 'se', 'ko', 'ye', 'yeh', 
+    'prouct', 'product', 'ko', 'bhi', 'achha', 'to', 'dekhao', 'dekhan', 'na', 'kuch', 'aur', 'nhi', 'sahi', 'hona', 'aaye', 'kaisa', 'aisa', 'ek', 'se', 'ho', 
+    'ya', 'koi', 'puchhe', 'bataye', 'kaise', 'sabse', 'jada', 'jyada', 'dikhan', 'dikhana', 'dikhaye', 'dikhayein', 'dhoondo', 'find', 'search', 'list', 'lelo', 'kharidna', 'purchase', 'le', 'jo', 'ho'
+  ];
 
   // Tokenize user message to extract search keywords
   const queryWords = query
     .replace(/[^\w\s]/g, '') // remove punctuation
-    .toLowerCase()
     .split(/\s+/)
     .filter(w => w.length > 2 && !stopwords.includes(w));
 
