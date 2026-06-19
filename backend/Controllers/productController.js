@@ -724,6 +724,8 @@ export const cameraSearch = catchAsyncErrors(async (req, res, next) => {
       console.warn("Failed to parse localKeywords from request:", e.message);
     }
   }
+
+  const localColor = req.body.localColor || "";
   
   try {
     // 1. Read temp file as base64
@@ -756,6 +758,10 @@ export const cameraSearch = catchAsyncErrors(async (req, res, next) => {
         // Merge keywords from file name and local classifier
         const mergedKeywords = new Set([...(parsedImage.keywords || []), ...localKeywordsArray]);
         parsedImage.keywords = Array.from(mergedKeywords);
+      }
+
+      if (localColor) {
+        parsedImage.color = parsedImage.color || localColor;
       }
     }
     const { category, keywords, brands, ocrText, color } = parsedImage;
@@ -840,6 +846,8 @@ export const cameraSearch = catchAsyncErrors(async (req, res, next) => {
       });
     }
 
+    const matchConditions = [];
+
     // Filter by matching keywords and build relevance score
     if (keywordsArray.length > 0) {
       const keywordConditions = [];
@@ -855,7 +863,19 @@ export const cameraSearch = catchAsyncErrors(async (req, res, next) => {
         values.push(`%${kw}%`);
         index++;
       });
-      conditions.push(`(${keywordConditions.join(" OR ")})`);
+      matchConditions.push(`(${keywordConditions.join(" OR ")})`);
+    }
+
+    // Filter by matching color so that same-color items are not filtered out on fallback
+    if (colorString) {
+      matchConditions.push(`(p.name ILIKE $${index} OR p.description ILIKE $${index})`);
+      values.push(`%${colorString}%`);
+      index++;
+    }
+
+    // Join them with OR so if either keywords or color matches, the product is included
+    if (matchConditions.length > 0) {
+      conditions.push(`(${matchConditions.join(" OR ")})`);
     }
 
     if (scores.length > 0) {

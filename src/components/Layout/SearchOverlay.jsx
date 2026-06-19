@@ -630,6 +630,64 @@ const SearchOverlay = () => {
         tempImg.onerror = reject;
       });
 
+      // Extract average/dominant color of image via Canvas
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = 10;
+        canvas.height = 10;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(tempImg, 0, 0, 10, 10);
+        const imgData = ctx.getImageData(0, 0, 10, 10).data;
+        
+        let rSum = 0, gSum = 0, bSum = 0, count = 0;
+        for (let i = 0; i < imgData.length; i += 4) {
+          if (imgData[i + 3] > 10) {
+            rSum += imgData[i];
+            gSum += imgData[i + 1];
+            bSum += imgData[i + 2];
+            count++;
+          }
+        }
+        
+        if (count > 0) {
+          const rAvg = Math.round(rSum / count);
+          const gAvg = Math.round(gSum / count);
+          const bAvg = Math.round(bSum / count);
+          
+          const colors = {
+            red: [180, 40, 40],
+            green: [40, 150, 40],
+            blue: [40, 40, 180],
+            yellow: [200, 200, 40],
+            white: [220, 220, 220],
+            black: [35, 35, 35],
+            gray: [120, 120, 120],
+            orange: [200, 110, 30],
+            pink: [220, 110, 160],
+            purple: [110, 40, 160],
+            brown: [110, 70, 40]
+          };
+          
+          let nearestColor = "gray";
+          let minDistance = Infinity;
+          for (const [name, rgb] of Object.entries(colors)) {
+            const dist = Math.sqrt(
+              Math.pow(rAvg - rgb[0], 2) +
+              Math.pow(gAvg - rgb[1], 2) +
+              Math.pow(bAvg - rgb[2], 2)
+            );
+            if (dist < minDistance) {
+              minDistance = dist;
+              nearestColor = name;
+            }
+          }
+          window.localColorValue = nearestColor;
+          console.log(`Extracted local color: ${nearestColor} (rgb: ${rAvg}, ${gAvg}, ${bAvg})`);
+        }
+      } catch (colorErr) {
+        console.warn("Failed to extract local color:", colorErr);
+      }
+
       const model = await window.mobilenet.load();
       const predictions = await model.classify(tempImg);
       // Clean and split className strings (e.g. "nappy, diaper" -> ["nappy", "diaper"])
@@ -647,6 +705,9 @@ const SearchOverlay = () => {
       formData.append("image", file);
       if (localKeywords.length > 0) {
         formData.append("localKeywords", JSON.stringify(localKeywords));
+      }
+      if (window.localColorValue) {
+        formData.append("localColor", window.localColorValue);
       }
 
       // Call visual search endpoint
