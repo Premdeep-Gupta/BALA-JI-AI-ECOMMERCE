@@ -693,6 +693,8 @@ export default function DeliveryPortal() {
           toast.error("🔐 Session expired or account not found. Please login again.", { autoClose: 3500 });
           localStorage.removeItem("token");
           localStorage.removeItem("delivery_session_phone");
+          setAgent(null);
+          setOrders([]);
           setTimeout(() => navigate("/delivery/login"), 3000);
           return;
         }
@@ -1280,7 +1282,6 @@ export default function DeliveryPortal() {
     return () => clearInterval(interval);
   }, [agent?.is_online, bookedShifts]);
 
-
   useEffect(() => {
     fetchProfileAndOrders();
     // Poll for new assigned orders every 60 seconds
@@ -1290,6 +1291,21 @@ export default function DeliveryPortal() {
       Object.values(simIntervals.current).forEach(clearInterval);
       stopAlarmSiren();
       if (countdownTimer.current) clearInterval(countdownTimer.current);
+
+      // ✅ Clean up Leaflet Map instances to prevent memory leaks / DOM errors
+      if (mapRefs.current) {
+        Object.keys(mapRefs.current).forEach((orderId) => {
+          try {
+            const mapObj = mapRefs.current[orderId];
+            if (mapObj && mapObj.map) {
+              mapObj.map.remove();
+            }
+          } catch (e) {
+            console.warn(`Failed to clean up map for order ${orderId}:`, e.message);
+          }
+        });
+        mapRefs.current = {};
+      }
     };
   }, []);
 

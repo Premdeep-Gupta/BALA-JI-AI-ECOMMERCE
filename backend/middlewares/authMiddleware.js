@@ -175,6 +175,11 @@ export const isDeliveryAgentAuthenticated = catchAsyncErrors(
       );
 
       if (agent.rows.length === 0) {
+        res.clearCookie("delivery_token", {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+        });
         return next(new ErrorHandler("Delivery agent not found.", 404));
       }
 
