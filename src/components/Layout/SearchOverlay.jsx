@@ -602,8 +602,22 @@ const SearchOverlay = () => {
     let localKeywords = [];
     try {
       setScanStage("🤖 Initializing local classifier...");
-      // Dynamically load TensorFlow.js & MobileNet
-      await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs");
+      // Re-use TensorFlow.js from @vladmandic/face-api if possible to avoid duplicate registration warnings
+      if (!window.tf) {
+        try {
+          const faceapi = await import("@vladmandic/face-api");
+          if (faceapi && faceapi.tf) {
+            window.tf = faceapi.tf;
+            console.log("Successfully re-used TensorFlow.js from @vladmandic/face-api");
+          }
+        } catch (err) {
+          console.warn("Could not import face-api tf instance, falling back to CDN:", err);
+        }
+      }
+
+      if (!window.tf) {
+        await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs");
+      }
       await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet");
 
       setScanStage("🧠 Analyzing image features locally...");

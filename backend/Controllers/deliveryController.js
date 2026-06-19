@@ -1317,3 +1317,18 @@ export const getMyFineHistory = catchAsyncErrors(async (req, res, next) => {
     offline_logs: offlineLogs.rows
   });
 });
+
+// ADMIN: Reset a delivery agent's password by phone (account recovery utility)
+export const adminResetDeliveryPassword = catchAsyncErrors(async (req, res, next) => {
+  const { phone, new_password } = req.body;
+  if (!phone || !new_password) {
+    return next(new ErrorHandler("Please provide phone and new_password.", 400));
+  }
+  const check = await database.query("SELECT id FROM delivery_agents WHERE phone = $1", [phone]);
+  if (check.rows.length === 0) {
+    return next(new ErrorHandler("No delivery agent found with this phone.", 404));
+  }
+  const hashed = await bcrypt.hash(new_password, 10);
+  await database.query("UPDATE delivery_agents SET password = $1 WHERE phone = $2", [hashed, phone]);
+  res.status(200).json({ success: true, message: `Password reset successfully for agent ${phone}` });
+});
