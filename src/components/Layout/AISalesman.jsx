@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import {
   MessageSquare, X, Send, Bot, Sparkles, Mic, MicOff, ShoppingCart,
   Volume2, VolumeX, Star, ChevronRight, Search, Zap, Heart, TrendingUp,
@@ -118,31 +118,33 @@ const InlineProductCard = ({ product, onAddToCart }) => {
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      className="mt-2 bg-white/5 border border-white/15 rounded-2xl overflow-hidden hover:border-indigo-500/50 transition group"
+      className="mt-2 bg-white/5 border border-white/15 rounded-2xl overflow-hidden hover:border-indigo-500/50 transition group cursor-pointer"
     >
       <div className="p-3 flex items-center gap-3">
-        <div className="w-14 h-14 rounded-xl bg-indigo-500/10 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden">
-          {imgSrc ? (
-            <img src={imgSrc} alt={product.name} className="w-full h-full object-cover" />
-          ) : (
-            <Package size={22} className="text-indigo-400" />
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-black text-white line-clamp-1">{product.name}</p>
-          <p className="text-[10px] font-bold text-slate-400 mt-0.5">{product.category}</p>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-sm font-black text-indigo-300">₹{Number(product.price).toLocaleString('en-IN')}</span>
-            {product.ratings && (
-              <span className="flex items-center gap-0.5 text-[9px] font-bold text-amber-400">
-                <Star size={9} fill="currentColor" /> {Number(product.ratings).toFixed(1)}
-              </span>
+        <Link to={`/product/${product.id || product._id}`} className="flex flex-1 items-center gap-3 min-w-0">
+          <div className="w-14 h-14 rounded-xl bg-indigo-500/10 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden">
+            {imgSrc ? (
+              <img src={imgSrc} alt={product.name} className="w-full h-full object-cover" />
+            ) : (
+              <Package size={22} className="text-indigo-400" />
             )}
           </div>
-        </div>
-        <div className="flex flex-col gap-1.5 shrink-0">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-black text-white line-clamp-1 group-hover:text-indigo-300 transition-colors">{product.name}</p>
+            <p className="text-[10px] font-bold text-slate-400 mt-0.5">{product.category}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-sm font-black text-indigo-300">₹{Number(product.price).toLocaleString('en-IN')}</span>
+              {product.ratings && (
+                <span className="flex items-center gap-0.5 text-[9px] font-bold text-amber-400">
+                  <Star size={9} fill="currentColor" /> {Number(product.ratings).toFixed(1)}
+                </span>
+              )}
+            </div>
+          </div>
+        </Link>
+        <div className="flex flex-col gap-1.5 shrink-0 relative z-10">
           <button
-            onClick={() => onAddToCart(product)}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAddToCart(product); }}
             className="p-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition shadow-lg shadow-indigo-600/20"
             title="Add to Cart"
           >
@@ -240,6 +242,7 @@ const VoiceResultsPanel = ({ results, intent, transcript, onAddToCart, onClose }
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 const AISalesman = () => {
   const dispatch = useDispatch();
+  const dragControls = useDragControls();
   const { products = [] } = useSelector(state => state.product || {});
 
   const [isOpen, setIsOpen] = useState(false);
@@ -597,6 +600,10 @@ const AISalesman = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 60, scale: 0.92 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            drag
+            dragControls={dragControls}
+            dragListener={false}
+            dragMomentum={false}
             className="ai-salesman-panel fixed bottom-6 right-6 w-[360px] sm:w-[420px] max-w-[calc(100vw-32px)] h-[620px] max-h-[calc(100vh-48px)] z-50 flex flex-col rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
             style={{
               background: 'linear-gradient(145deg, #0d0d18 0%, #0f0f20 100%)',
@@ -604,7 +611,10 @@ const AISalesman = () => {
             }}
           >
             {/* ── HEADER ── */}
-            <div className="relative p-4 flex items-center justify-between border-b border-white/10 overflow-hidden shrink-0">
+            <div 
+              onPointerDown={(e) => dragControls.start(e)}
+              className="relative p-4 flex items-center justify-between border-b border-white/10 overflow-hidden shrink-0 cursor-grab active:cursor-grabbing select-none"
+            >
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/10 via-purple-600/10 to-pink-600/5 pointer-events-none" />
               <div className="flex items-center gap-3 relative z-10">
                 {/* Avatar */}
@@ -627,7 +637,7 @@ const AISalesman = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5 relative z-10">
+              <div className="flex items-center gap-1.5 relative z-10" onPointerDown={(e) => e.stopPropagation()}>
                 {/* Speaker toggle */}
                 <button
                   onClick={() => setIsSpeakerOn(s => !s)}
