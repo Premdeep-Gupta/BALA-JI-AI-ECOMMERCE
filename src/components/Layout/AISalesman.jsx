@@ -36,13 +36,22 @@ const detectTextLanguage = (text) => {
 const speakText = (text) => {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  const clean = text.replace(/\[.*?\]/g, '').replace(/[*_~`]/g, '').slice(0, 200);
+  
+  // Clean text: strip action blocks, emojis, markdown formatting, and replace newlines with breathing pauses
+  const clean = text
+    .replace(/\[.*?\]/g, '')
+    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '')
+    .replace(/[*_~`#]/g, '')
+    .replace(/\n+/g, '. ')
+    .trim()
+    .slice(0, 250);
+
   const utter = new SpeechSynthesisUtterance(clean);
   const detectedLang = detectTextLanguage(clean);
   utter.lang = detectedLang;
-  utter.rate = 1.05;
-  utter.pitch = 1.1;
-  utter.volume = 0.95;
+  utter.rate = 1.0;  // Normal speed for maximum clarity
+  utter.pitch = 1.0; // Natural pitch
+  utter.volume = 1.0;
   
   const voices = window.speechSynthesis.getVoices();
   const preferredVoice = voices.find(v => v.lang.toLowerCase() === detectedLang.toLowerCase() || v.lang.startsWith(detectedLang.slice(0, 2)));
