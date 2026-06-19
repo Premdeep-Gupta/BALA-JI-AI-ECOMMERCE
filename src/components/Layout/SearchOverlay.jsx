@@ -343,7 +343,7 @@ const deleteRecent = (query) => {
 // ============================================================
 const getRecentProducts = () => {
   try {
-    return JSON.parse(localStorage.getItem("__sg_recent_products") || "[]").slice(0, 5);
+    return JSON.parse(localStorage.getItem("__sg_recent_products") || "[]").slice(0, 6);
   } catch { return []; }
 };
 const saveRecentProduct = (product) => {
@@ -359,7 +359,7 @@ const saveRecentProduct = (product) => {
       ratings: product.ratings
     };
     const prev = getRecentProducts().filter(p => (p._id || p.id) !== (pData._id || pData.id));
-    localStorage.setItem("__sg_recent_products", JSON.stringify([pData, ...prev].slice(0, 5)));
+    localStorage.setItem("__sg_recent_products", JSON.stringify([pData, ...prev].slice(0, 6)));
   } catch {}
 };
 
