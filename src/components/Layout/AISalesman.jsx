@@ -11,6 +11,7 @@ import { addToCart } from '../../store/slices/cartSlice';
 import { toggleCart } from '../../store/slices/popupSlice';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { getSecureProductImage } from '../../utils/urlHelper';
 
 // ─── VOICE RECOGNITION ENGINE ────────────────────────────────────────────────
 const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -596,7 +597,7 @@ const AISalesman = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 60, scale: 0.92 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="ai-salesman-panel fixed bottom-6 right-6 w-[360px] sm:w-[420px] h-[620px] z-50 flex flex-col rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
+            className="ai-salesman-panel fixed bottom-6 right-6 w-[360px] sm:w-[420px] max-w-[calc(100vw-32px)] h-[620px] max-h-[calc(100vh-48px)] z-50 flex flex-col rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
             style={{
               background: 'linear-gradient(145deg, #0d0d18 0%, #0f0f20 100%)',
               boxShadow: '0 0 80px rgba(99,102,241,0.15), 0 30px 60px rgba(0,0,0,0.8)',
