@@ -17,19 +17,38 @@ import { getSecureProductImage } from '../../utils/urlHelper';
 const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
 const hasSpeechAPI = !!SpeechRecognitionAPI;
 
-// ─── TEXT-TO-SPEECH ───────────────────────────────────────────────────────────
+// ─── TEXT-TO-SPEECH WITH DYNAMIC SCRIPT DETECTOR ────────────────────────────────
+const detectTextLanguage = (text) => {
+  if (/[\u0900-\u097F]/.test(text)) return 'hi-IN'; // Devanagari (Hindi, Marathi, etc.)
+  if (/[\u0980-\u09FF]/.test(text)) return 'bn-IN'; // Bengali
+  if (/[\u0B80-\u0BFF]/.test(text)) return 'ta-IN'; // Tamil
+  if (/[\u0C00-\u0C7F]/.test(text)) return 'te-IN'; // Telugu
+  if (/[\u0C80-\u0CFF]/.test(text)) return 'kn-IN'; // Kannada
+  if (/[\u0D00-\u0D7F]/.test(text)) return 'ml-IN'; // Malayalam
+  if (/[\u0A80-\u0AFF]/.test(text)) return 'gu-IN'; // Gujarati
+  if (/[\u0A00-\u0A7F]/.test(text)) return 'pa-IN'; // Gurmukhi (Punjabi)
+  return 'en-IN'; // Default English-India
+};
+
 const speakText = (text) => {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const clean = text.replace(/\[.*?\]/g, '').replace(/[*_~`]/g, '').slice(0, 200);
   const utter = new SpeechSynthesisUtterance(clean);
-  utter.lang = 'en-IN';
+  const detectedLang = detectTextLanguage(clean);
+  utter.lang = detectedLang;
   utter.rate = 1.05;
   utter.pitch = 1.1;
   utter.volume = 0.95;
+  
   const voices = window.speechSynthesis.getVoices();
-  const preferredVoice = voices.find(v => v.lang.includes('en-IN') || v.name.includes('Google Hindi'));
-  if (preferredVoice) utter.voice = preferredVoice;
+  const preferredVoice = voices.find(v => v.lang.startsWith(detectedLang.slice(0, 2)));
+  if (preferredVoice) {
+    utter.voice = preferredVoice;
+  } else {
+    const fallbackVoice = voices.find(v => v.lang.includes('en-IN') || v.lang.includes('hi-IN'));
+    if (fallbackVoice) utter.voice = fallbackVoice;
+  }
   window.speechSynthesis.speak(utter);
 };
 
