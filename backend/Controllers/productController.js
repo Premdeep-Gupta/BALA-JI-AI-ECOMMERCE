@@ -849,16 +849,20 @@ export const cameraSearch = catchAsyncErrors(async (req, res, next) => {
     const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 
     const query = `
-      SELECT ${PRODUCT_SELECT_FIELDS}, 
-      COUNT(r.id) AS review_count,
-      MAX(COALESCE(ps.visual_search_clicks, 0)) as past_clicks
-      ${relevanceSelect}
-      FROM products p
-      LEFT JOIN reviews r ON p.id = r.product_id
-      LEFT JOIN product_stats ps ON p.id = ps.product_id
-      ${whereClause}
-      GROUP BY p.id
-      ORDER BY (relevance_score + MAX(COALESCE(ps.visual_search_clicks, 0)) * 5) DESC, p.created_at DESC
+      WITH scored_products AS (
+        SELECT ${PRODUCT_SELECT_FIELDS}, 
+        COUNT(r.id) AS review_count,
+        MAX(COALESCE(ps.visual_search_clicks, 0)) as past_clicks
+        ${relevanceSelect}
+        FROM products p
+        LEFT JOIN reviews r ON p.id = r.product_id
+        LEFT JOIN product_stats ps ON p.id = ps.product_id
+        ${whereClause}
+        GROUP BY p.id
+      )
+      SELECT * 
+      FROM scored_products
+      ORDER BY (relevance_score + past_clicks * 5) DESC, created_at DESC
       LIMIT 12
     `;
 
