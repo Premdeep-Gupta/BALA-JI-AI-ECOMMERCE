@@ -82,7 +82,18 @@ export function parseSearchQueryLocally(query) {
     // Electronics / Utility
     "pankha": "fan",
     "tar": "wire",
-    "batti": "light"
+    "batti": "light",
+
+    // Books
+    "kitab": "book",
+    "kitaab": "book",
+    "kitabein": "books",
+    "kitaben": "books",
+
+    // Automotive
+    "gaadi": "car",
+    "gadi": "car",
+    "motor": "car"
   };
 
   const cleanQuery = query.toLowerCase().trim();
@@ -94,8 +105,104 @@ export function parseSearchQueryLocally(query) {
   // Dynamically split user query into clean keywords (ignoring short words)
   const keywords = lowerQuery.split(/\s+/).filter(w => w.length > 2);
 
-  // Kids & Baby food / products
+  // Mobiles
   if (
+    lowerQuery.includes("phone") || 
+    lowerQuery.includes("mobile") || 
+    lowerQuery.includes("iphone") || 
+    lowerQuery.includes("samsung") || 
+    lowerQuery.includes("android") || 
+    lowerQuery.includes("vivo") || 
+    lowerQuery.includes("oppo") || 
+    lowerQuery.includes("realme") || 
+    lowerQuery.includes("oneplus") || 
+    lowerQuery.includes("infinix") || 
+    lowerQuery.includes("motorola") || 
+    lowerQuery.includes("redmi") || 
+    lowerQuery.includes("xiaomi") || 
+    lowerQuery.includes("pixel") ||
+    lowerQuery.includes("mobail") ||
+    lowerQuery.includes("fone")
+  ) {
+    category = "Mobiles";
+  }
+  // Electronics
+  else if (
+    lowerQuery.includes("laptop") || 
+    lowerQuery.includes("macbook") || 
+    lowerQuery.includes("notebook") || 
+    lowerQuery.includes("chromebook") || 
+    lowerQuery.includes("computer") || 
+    lowerQuery.includes("pc") || 
+    lowerQuery.includes("tablet") || 
+    lowerQuery.includes("ipad") || 
+    lowerQuery.includes("tv") || 
+    lowerQuery.includes("television") || 
+    lowerQuery.includes("earphone") || 
+    lowerQuery.includes("headphone") || 
+    lowerQuery.includes("earbud") || 
+    lowerQuery.includes("airpod") || 
+    lowerQuery.includes("speaker") || 
+    lowerQuery.includes("charger") || 
+    lowerQuery.includes("cable") || 
+    lowerQuery.includes("power bank") || 
+    lowerQuery.includes("camera") || 
+    lowerQuery.includes("dslr") || 
+    lowerQuery.includes("watch") || 
+    lowerQuery.includes("smartwatch") ||
+    lowerQuery.includes("pankha") ||
+    lowerQuery.includes("fan") ||
+    lowerQuery.includes("led") ||
+    lowerQuery.includes("soundbar") ||
+    lowerQuery.includes("keyboard") ||
+    lowerQuery.includes("mouse")
+  ) {
+    category = "Electronics";
+  }
+  // Automotive
+  else if (
+    lowerQuery.includes("car") || 
+    lowerQuery.includes("bike") || 
+    lowerQuery.includes("helmet") || 
+    lowerQuery.includes("tyre") || 
+    lowerQuery.includes("tire") || 
+    lowerQuery.includes("gaadi") || 
+    lowerQuery.includes("gadi") || 
+    lowerQuery.includes("automotive")
+  ) {
+    category = "Automotive";
+  }
+  // Sports
+  else if (
+    lowerQuery.includes("bat") || 
+    lowerQuery.includes("ball") || 
+    lowerQuery.includes("cricket") || 
+    lowerQuery.includes("football") || 
+    lowerQuery.includes("gym") || 
+    lowerQuery.includes("dumbbell") || 
+    lowerQuery.includes("yoga") || 
+    lowerQuery.includes("badminton") || 
+    lowerQuery.includes("sports") || 
+    lowerQuery.includes("fitness") || 
+    lowerQuery.includes("protein") || 
+    lowerQuery.includes("supplement")
+  ) {
+    category = "Sports";
+  }
+  // Books
+  else if (
+    lowerQuery.includes("book") || 
+    lowerQuery.includes("novel") || 
+    lowerQuery.includes("textbook") || 
+    lowerQuery.includes("kitaab") || 
+    lowerQuery.includes("kitab") || 
+    lowerQuery.includes("ncert") || 
+    lowerQuery.includes("upsc")
+  ) {
+    category = "Books";
+  }
+  // Kids & Baby food / products
+  else if (
     lowerQuery.includes("bachha") || 
     lowerQuery.includes("bacchon") || 
     lowerQuery.includes("baby") || 
@@ -291,6 +398,87 @@ export async function parseImageFallback(fileName, mimeType) {
   let keywords = [];
 
   if (
+    lowerName.includes("phone") || 
+    lowerName.includes("mobile") || 
+    lowerName.includes("iphone") || 
+    lowerName.includes("samsung") || 
+    lowerName.includes("android") || 
+    lowerName.includes("vivo") || 
+    lowerName.includes("oppo") || 
+    lowerName.includes("realme") || 
+    lowerName.includes("oneplus") || 
+    lowerName.includes("infinix") || 
+    lowerName.includes("motorola") || 
+    lowerName.includes("redmi") || 
+    lowerName.includes("xiaomi") || 
+    lowerName.includes("pixel")
+  ) {
+    category = "Mobiles";
+    const cleanWords = lowerName.replace(/[^a-z0-9]/g, " ").split(/\s+/).filter(w => w.length > 2 && w !== "jpg" && w !== "png" && w !== "jpeg");
+    keywords = cleanWords.length > 0 ? cleanWords : ["smartphone", "mobile"];
+  } else if (
+    lowerName.includes("laptop") || 
+    lowerName.includes("macbook") || 
+    lowerName.includes("notebook") || 
+    lowerName.includes("chromebook") || 
+    lowerName.includes("computer") || 
+    lowerName.includes("tablet") || 
+    lowerName.includes("ipad") || 
+    lowerName.includes("earphone") || 
+    lowerName.includes("headphone") || 
+    lowerName.includes("earbud") || 
+    lowerName.includes("airpod") || 
+    lowerName.includes("speaker") || 
+    lowerName.includes("charger") || 
+    lowerName.includes("cable") || 
+    lowerName.includes("powerbank") || 
+    lowerName.includes("camera") || 
+    lowerName.includes("dslr") || 
+    lowerName.includes("watch") || 
+    lowerName.includes("smartwatch") ||
+    lowerName.includes("television") ||
+    lowerName.includes("tv")
+  ) {
+    category = "Electronics";
+    const cleanWords = lowerName.replace(/[^a-z0-9]/g, " ").split(/\s+/).filter(w => w.length > 2 && w !== "jpg" && w !== "png" && w !== "jpeg");
+    keywords = cleanWords.length > 0 ? cleanWords : ["electronics", "gadget"];
+  } else if (
+    lowerName.includes("car") || 
+    lowerName.includes("bike") || 
+    lowerName.includes("helmet") || 
+    lowerName.includes("tyre") || 
+    lowerName.includes("tire") || 
+    lowerName.includes("automotive")
+  ) {
+    category = "Automotive";
+    const cleanWords = lowerName.replace(/[^a-z0-9]/g, " ").split(/\s+/).filter(w => w.length > 2 && w !== "jpg" && w !== "png" && w !== "jpeg");
+    keywords = cleanWords.length > 0 ? cleanWords : ["automotive", "car"];
+  } else if (
+    lowerName.includes("bat") || 
+    lowerName.includes("ball") || 
+    lowerName.includes("cricket") || 
+    lowerName.includes("football") || 
+    lowerName.includes("gym") || 
+    lowerName.includes("dumbbell") || 
+    lowerName.includes("yoga") || 
+    lowerName.includes("badminton") || 
+    lowerName.includes("sports") || 
+    lowerName.includes("fitness")
+  ) {
+    category = "Sports";
+    const cleanWords = lowerName.replace(/[^a-z0-9]/g, " ").split(/\s+/).filter(w => w.length > 2 && w !== "jpg" && w !== "png" && w !== "jpeg");
+    keywords = cleanWords.length > 0 ? cleanWords : ["sports", "fitness"];
+  } else if (
+    lowerName.includes("book") || 
+    lowerName.includes("novel") || 
+    lowerName.includes("ncert") || 
+    lowerName.includes("upsc") || 
+    lowerName.includes("textbook")
+  ) {
+    category = "Books";
+    const cleanWords = lowerName.replace(/[^a-z0-9]/g, " ").split(/\s+/).filter(w => w.length > 2 && w !== "jpg" && w !== "png" && w !== "jpeg");
+    keywords = cleanWords.length > 0 ? cleanWords : ["book", "reading"];
+  } else if (
     lowerName.includes("saree") || 
     lowerName.includes("dress") || 
     lowerName.includes("kurti") || 

@@ -466,7 +466,16 @@ const SearchOverlay = () => {
 
   // ── Handle search
   const handleSearch = useCallback(async (query = searchQuery) => {
-    const q = (resolveAlias(query) || query).trim();
+    let cleanQuery = query.trim();
+    if (cleanQuery.startsWith("📸 Visual:")) {
+      const match = cleanQuery.match(/\(([^)]+)\)/);
+      if (match && match[1]) {
+        cleanQuery = match[1];
+      } else {
+        cleanQuery = cleanQuery.replace(/^📸\s*Visual:\s*/i, "").replace(/^[^(]+/, "").replace(/[()]/g, "").trim();
+      }
+    }
+    const q = (resolveAlias(cleanQuery) || cleanQuery).trim();
     if (!q) return;
 
     saveRecent(query.trim());
@@ -724,6 +733,22 @@ const SearchOverlay = () => {
         } else {
           setScanStage("✅ Scan Complete!");
         }
+        
+        // Save to recent search history
+        const categoryName = response.data.category || "";
+        const keywordsList = Array.isArray(response.data.keywords) ? response.data.keywords : [];
+        const keywordSlice = keywordsList.length > 0 ? keywordsList.slice(0, 3).join(", ") : "";
+        let visualQuery = "📸 Visual";
+        if (categoryName && keywordSlice) {
+          visualQuery = `📸 Visual: ${categoryName} (${keywordSlice})`;
+        } else if (categoryName) {
+          visualQuery = `📸 Visual: ${categoryName}`;
+        } else if (keywordSlice) {
+          visualQuery = `📸 Visual: (${keywordSlice})`;
+        }
+        
+        saveRecent(visualQuery);
+        setRecentSearches(getRecent());
         
         // Take matching products from backend and show them
         let results = response.data.products || [];
