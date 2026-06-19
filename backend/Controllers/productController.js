@@ -758,10 +758,28 @@ export const cameraSearch = catchAsyncErrors(async (req, res, next) => {
         parsedImage.keywords = Array.from(mergedKeywords);
       }
     }
-    const { category, keywords = [], brands = [], ocrText = "", color = "" } = parsedImage;
-    console.log("📸 Visual Search parsed:", { category, keywords, brands, ocrText, color, isFallback });
+    const { category, keywords, brands, ocrText, color } = parsedImage;
 
-    if (!category && keywords.length === 0 && brands.length === 0 && !ocrText && !color) {
+    // Safely normalize arrays & strings from Gemini JSON to prevent runtime type crashes
+    const keywordsArray = Array.isArray(keywords) 
+      ? keywords 
+      : (typeof keywords === "string" && keywords ? [keywords] : []);
+
+    const brandsArray = Array.isArray(brands) 
+      ? brands 
+      : (typeof brands === "string" && brands ? [brands] : []);
+
+    const colorString = typeof color === "string" 
+      ? color 
+      : (Array.isArray(color) && color.length > 0 ? color[0] : "");
+
+    const ocrString = typeof ocrText === "string" 
+      ? ocrText 
+      : (Array.isArray(ocrText) ? ocrText.join(" ") : "");
+
+    console.log("📸 Visual Search parsed & normalized:", { category, keywordsArray, brandsArray, ocrString, colorString, isFallback });
+
+    if (!category && keywordsArray.length === 0 && brandsArray.length === 0 && !ocrString && !colorString) {
       await fs.remove(imageFile.tempFilePath);
       // Return top rated products as fallback suggestions
       const fallbackQuery = `
@@ -797,8 +815,8 @@ export const cameraSearch = catchAsyncErrors(async (req, res, next) => {
     }
 
     // Brand matching boost
-    if (brands && brands.length > 0) {
-      brands.forEach(brand => {
+    if (brandsArray.length > 0) {
+      brandsArray.forEach(brand => {
         scores.push(`(CASE WHEN (p.name ILIKE $${index} OR p.description ILIKE $${index} OR p.sub_category ILIKE $${index}) THEN 20 ELSE 0 END)`);
         values.push(`%${brand}%`);
         index++;
@@ -806,15 +824,15 @@ export const cameraSearch = catchAsyncErrors(async (req, res, next) => {
     }
 
     // Color matching boost
-    if (color) {
+    if (colorString) {
       scores.push(`(CASE WHEN (p.name ILIKE $${index} OR p.description ILIKE $${index}) THEN 15 ELSE 0 END)`);
-      values.push(`%${color}%`);
+      values.push(`%${colorString}%`);
       index++;
     }
 
     // OCR text matching boost
-    if (ocrText && ocrText.trim().length > 2) {
-      const ocrWords = ocrText.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+    if (ocrString && ocrString.trim().length > 2) {
+      const ocrWords = ocrString.toLowerCase().split(/\s+/).filter(w => w.length > 2);
       ocrWords.forEach(word => {
         scores.push(`(CASE WHEN (p.name ILIKE $${index} OR p.description ILIKE $${index}) THEN 15 ELSE 0 END)`);
         values.push(`%${word}%`);
@@ -823,9 +841,9 @@ export const cameraSearch = catchAsyncErrors(async (req, res, next) => {
     }
 
     // Filter by matching keywords and build relevance score
-    if (keywords && keywords.length > 0) {
+    if (keywordsArray.length > 0) {
       const keywordConditions = [];
-      keywords.forEach(kw => {
+      keywordsArray.forEach(kw => {
         keywordConditions.push(`(p.name ILIKE $${index} OR p.description ILIKE $${index} OR p.category ILIKE $${index})`);
         values.push(`%${kw}%`);
         index++;
@@ -894,10 +912,10 @@ export const cameraSearch = catchAsyncErrors(async (req, res, next) => {
     res.status(200).json({
       success: true,
       category,
-      keywords,
-      brands,
-      ocrText,
-      color,
+      keywords: keywordsArray,
+      brands: brandsArray,
+      ocrText: ocrString,
+      color: colorString,
       isFallback,
       products: mappedProducts
     });

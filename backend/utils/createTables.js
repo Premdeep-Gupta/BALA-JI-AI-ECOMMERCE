@@ -43,6 +43,24 @@ export const createTables = async () => {
     await createDeliveryShiftBookingsTable();
     await createUserAddressesTable();
 
+    // Create product_stats table for Self-Learning Ranking
+    await database.query(`
+      CREATE TABLE IF NOT EXISTS product_stats (
+        product_id UUID PRIMARY KEY REFERENCES products(id) ON DELETE CASCADE,
+        visual_search_clicks INTEGER DEFAULT 0,
+        visual_search_purchases INTEGER DEFAULT 0,
+        last_clicked_at TIMESTAMP
+      );
+    `);
+
+    // Ensure browsing_history has the required columns for personalization tracking
+    await database.query(`
+      ALTER TABLE browsing_history 
+      ADD COLUMN IF NOT EXISTS search_query VARCHAR(255),
+      ADD COLUMN IF NOT EXISTS is_visual_search BOOLEAN DEFAULT FALSE;
+    `);
+
+
     // Create cosine similarity function for visual recommendations
     await database.query(`
       CREATE OR REPLACE FUNCTION cosine_similarity(a real[], b real[])
