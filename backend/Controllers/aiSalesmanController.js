@@ -66,30 +66,267 @@ const normalizeQueryText = (msg) => {
     .replace(/sare\b|sari/g, 'saree');
 };
 
+// ─── 22-LANGUAGE TRANSLITERATION DICTIONARY ────────────────────────────────────
+const transliterateNonEnglishTokens = {
+  // Samsung
+  "सैमसंग": "samsung", "सेमसंग": "samsung", "समसंग": "samsung",
+  "স্যামসাং": "samsung", "স্যামসং": "samsung", "সেমসেং": "samsung",
+  "சாம்சங்": "samsung", "சேம்சுங்": "samsung",
+  "సామ్‌సంగ్": "samsung", "శామ్‌సంగ్": "samsung", "సామ్సంగ్": "samsung", "శామ్సంగ్": "samsung",
+  "ಸ್ಯಾಮ್ಸಂಗ್": "samsung", "ಸ್ಯಾಮ್‌ಸಂಗ್": "samsung",
+  "സാംസങ്": "samsung", "സാംസങ്ങ്": "samsung",
+  "સેમસંગ": "samsung",
+  "ਸੈਮਸੰਗ": "samsung", "ਸੈਮਸੰਗੁ": "samsung",
+  "ସାମସଙ୍ଗ": "samsung", "ସାମସଙ୍ਗ୍": "samsung",
+  "سیمسنگ": "samsung", "سام سنگ": "samsung", "سامسنگ": "samsung",
+
+  // iPhone
+  "आईफोन": "iphone", "आइफोन": "iphone", "आईफ़ोन": "iphone", "आइफ़ोन": "iphone",
+  "아이폰": "iphone",
+  "আইফোন": "iphone", "আইফন": "iphone",
+  "ஐபோன்": "iphone",
+  "ఐఫోన్": "iphone",
+  "ಐಫೋನ್": "iphone",
+  "ഐഫോൺ": "iphone",
+  "આઇફોન": "iphone", "આઈફોન": "iphone",
+  "ਆਈਫੋਨ": "iphone",
+  "ଆଇଫୋନ୍": "iphone", "ଆଇଫୋନ": "iphone",
+  "آئی فون": "iphone", "آئیفون": "iphone", "ایں فون": "iphone",
+
+  // Apple
+  "एप्पल": "apple", "एपल": "apple", "ऍपल": "apple", "एप्ल": "apple", "सेब": "apple",
+  "অ্যাপেল": "apple", "আপেল": "apple", "অ্যাপল": "apple",
+  "ஆப்பிள்": "apple", "ஆப்பில்": "apple",
+  "యాపిల్": "apple", "ఆపిల్": "apple",
+  "ಆಪಲ್": "apple",
+  "ആപ്പിൾ": "apple",
+  "એપલ": "apple",
+  "ਐਪਲ": "apple",
+  "ਆਪਲ୍": "apple", "ਆਪଲ": "apple", "ସେଓ": "apple",
+  "ایپل": "apple", "سیب": "apple",
+
+  // Laptop
+  "लैपटॉप": "laptop", "लेपटॉप": "laptop", "लेपटोप": "laptop", "लैपटोप": "laptop",
+  "ল্যাপটপ": "laptop", "লেপটপ": "laptop",
+  "லேப்டாப்": "laptop", "மடிக்கணினி": "laptop",
+  "ల్యాప్‌టాప్": "laptop", "లాప్‌టాప్": "laptop", "లాప్టాప్": "laptop", "ల్యాప్టాప్": "laptop",
+  "ಲ್ಯಾಪ್‌ಟಾಪ್": "laptop", "ಲ್ಯಾಪ್ಟಾಪ್": "laptop",
+  "ലാപ്ടോപ്പ്": "laptop", "ലാപ്ടോപ്": "laptop",
+  "લેપટોપ": "laptop",
+  "ਲੈਪਟਾਪ": "laptop", "ਲੈਪਟੌਪ": "laptop",
+  "ଲାପଟପ୍": "laptop", "ଲାପଟପ": "laptop",
+  "لیپ ٹاپ": "laptop", "لیپٹاپ": "laptop",
+
+  // Mobile / Phone
+  "मोबाइल": "mobile", "मोबाईल": "mobile", "फोन": "mobile", "फ़ोन": "mobile", "स्मार्टफोन": "mobile", "स्मार्टफ़ोन": "mobile",
+  "মোবাইল": "mobile", "ফোন": "mobile", "স্মार्टফোন": "mobile",
+  "மொபைல்": "mobile", "போன்": "mobile", "தொலைபேசி": "mobile", "ஸ்மார்ட்போன்": "mobile",
+  "మొబైల్": "mobile", "ఫోన్": "mobile", "స్మార్ట్‌ఫోన్": "mobile",
+  "ಮೊಬೈಲ್": "mobile", "ಮೊಬైಲ್": "mobile", "ಫೋನ್": "mobile", "ಸ್ಮಾರ್ಟ್ಫೋನ್": "mobile",
+  "മൊബൈൽ": "mobile", "ഫോൺ": "mobile", "സ്മാർട്ട്ഫോൺ": "mobile",
+  "મોબાઇલ": "mobile", "મોಬાઈલ": "mobile", "ફોન": "mobile", "સ્માર્ટফোন": "mobile",
+  "ਮੋਬਾਈਲ": "mobile", "ਫੋਨ": "mobile", "ਸਮਾਰਟਫੋน": "mobile",
+  "ਮୋବାଇਲ୍": "mobile", "ਮୋବାଇଲ": "mobile", "ଫୋନ୍": "mobile", "ଫୋନ": "mobile",
+  "موبائل": "mobile", "فون": "mobile", "اسمارٹ فون": "mobile",
+
+  // Shoes / Footwear
+  "जूते": "shoes", "जूता": "shoes", "शूज़": "shoes", "शयूज": "shoes", "चप्पल": "shoes", "फुटवियर": "shoes", "स्लीपर्स": "shoes",
+  "জুতো": "shoes", "জুতা": "shoes", "শু": "shoes", "চটি": "shoes",
+  "காலணி": "shoes", "செருப்பு": "shoes", "ஷூ": "shoes",
+  "బూట్లు": "shoes", "చెప్పులు": "shoes", "షూస్": "shoes", "షూ": "shoes",
+  "ಶೂಗಳು": "shoes", "ಶೂ": "shoes", "ಚಪ್ಪಲಿ": "shoes",
+  "ഷൂസ്": "shoes", "ഷൂ": "shoes", "ചെരുപ്പ്": "shoes",
+  "જૂતા": "shoes", "બૂট": "shoes", "ચંપલ": "shoes", "શૂઝ": "shoes",
+  "ਜੁੱਤੇ": "shoes", "ਜੁੱਤੀ": "shoes", "ਸ਼ੂਜ਼": "shoes",
+  "ଜୋତା": "shoes", "ଚପଲ": "shoes", "ଶୁଜ୍": "shoes",
+  "جوتے": "shoes", "جوتا": "shoes", "شوز": "shoes", "چپل": "shoes",
+
+  // Saree / Sari
+  "साड़ी": "saree", "साड़ी": "saree", "साडी": "saree",
+  "শাড়ি": "saree", "শাড়ী": "saree", "সাড়ি": "saree",
+  "புடவை": "saree", "சேலை": "saree",
+  "చీర": "saree", "చీరలు": "saree",
+  "ಸೀರೆ": "saree", "ಸೀರೆಗಳು": "saree",
+  "സാരി": "saree", "സാരികൾ": "saree",
+  "સાડી": "saree",
+  "ਸਾੜ੍ਹੀ": "saree", "ਸਾੜੀ": "saree",
+  "ଶାଢ଼ୀ": "saree", "ଶାଢୀ": "saree",
+  "ساڑھی": "saree", "ساڑی": "saree",
+
+  // Book / Books
+  "किताब": "books", "किताबें": "books", "पुस्तक": "books", "पुस्तकें": "books", "बुक": "books", "बुक्स": "books",
+  "বই": "books", "বইপত্র": "books", "পুস্তক": "books",
+  "புத்தகம்": "books", "புத்தகங்கள்": "books", "நூல்": "books",
+  "పుస్తకం": "books", "పుస్తకాలు": "books",
+  "ಪುಸ್ತಕ": "books", "ಪುレスレットಗಳು": "books",
+  "ಪುಸ್ತಕಗಳು": "books",
+  "പുസ്തകം": "books", "പുസ്തകങ്ങൾ": "books", "ബുക്ക്": "books",
+  "ચોપડી": "books", "પુસ્તક": "books", "ચોપડીઓ": "books", "પુસ્તકો": "books",
+  "ਕਿਤਾਬ": "books", "ਕਿਤਾਬਾਂ": "books", "ਪੁਸਤਕ": "books",
+  "ବହି": "books", "ପୁସ୍ତକ": "books",
+  "کتاب": "books", "کتابیں": "books", "کتب": "books", "بکس": "books",
+
+  // Watch / Watches
+  "घड़ी": "watch", "घड़ी": "watch", "घड़ियाँ": "watch", "घड़ियां": "watch", "वॉच": "watch", "वाच": "watch",
+  "ঘড়ি": "watch", "ঘড়ি": "watch",
+  "கடிகாரம்": "watch", "வாட்ச்": "watch",
+  "வாச்": "watch", "వాచ్": "watch", "వాచీలు": "watch", "గడియారం": "watch",
+  "ವಾಚ್": "watch", "ಗಡಿಯಾರ": "watch",
+  "വാച്ച്": "watch", "ഘടികാരം": "watch",
+  "ઘડિયાળ": "watch", "વોચ": "watch",
+  "ਘੜੀ": "watch", "ਘੜੀਆਂ": "watch", "ਵਾਚ": "watch",
+  "ଘଣ୍ଟା": "watch", "ଘଡ଼ି": "watch", "ୱାଚ୍": "watch",
+  "گھڑی": "watch", "گھڑیاں": "watch", "واچ": "watch",
+
+  // Groceries / Grocery
+  "किराना": "grocery", "राशन": "grocery", "ग्रॉसरी": "grocery", "ग्रोसरी": "grocery",
+  "মুদিখানা": "grocery", "মুদি": "grocery", "গ্রোসারি": "grocery",
+  "மளிகை": "grocery",
+  "కిరాణా": "grocery", "గ్రాసరీ": "grocery",
+  "ದินಸಿ": "grocery",
+  "ದಿನಸಿ ಸಾಮಗ್ರಿಗಳು": "grocery",
+  "പലചരക്ക്": "grocery", "ഗ്രോസറി": "grocery",
+  "ਕਰિયાણું": "grocery", "ગ્રોસરી": "grocery",
+  "ਕਰਿਆਨਾ": "grocery", "ਰਾਸ਼ਨ": "grocery",
+  "ଗ୍ରୋସରୀ": "grocery", "ରାସନ": "grocery",
+  "راشن": "grocery", "کریانہ": "grocery", "گروسری": "grocery"
+};
+
+// Helper to preprocess multi-word combinations in non-English scripts
+const preProcessMultilingualText = (text) => {
+  if (!text) return "";
+  let clean = text;
+  
+  clean = clean.replace(/आई\s+फोन/g, "आईफोन");
+  clean = clean.replace(/आइ\s+फोन/g, "आइफोन");
+  clean = clean.replace(/আই\s+ফোন/g, "আইফোন");
+  clean = clean.replace(/ஐ\s+போன்/g, "ஐபோன்");
+  clean = clean.replace(/ఐ\s+ఫోన్/g, "ఐఫోన్");
+  clean = clean.replace(/ಐ\s+ಫೋನ್/g, "ಐಫೋನ್");
+  clean = clean.replace(/ഐ\s+ഫോൺ/g, "ಐഫോൺ");
+  clean = clean.replace(/આઇ\s+ફોન/g, "આઇફોન");
+  clean = clean.replace(/ਆਈ\s+ਫੋਨ/g, "ਆਈਫੋਨ");
+  clean = clean.replace(/ਆਈ\s+ଫୋନ୍/g, "ਆਈଫୋନ୍");
+  clean = clean.replace(/آئی\s+فون/g, "آئیفون");
+  clean = clean.replace(/ایں\s+فون/g, "آئیفون");
+
+  clean = clean.replace(/سام\s+سنگ/g, "سامسنگ");
+  
+  return clean;
+};
+
+// ─── EXTRACT SEARCH TOKENS ───────────────────────────────────────────────────
+export const extractSearchTokens = (queryText) => {
+  if (!queryText) return [];
+  
+  const preprocessed = preProcessMultilingualText(queryText);
+  const cleanText = preprocessed.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"'’‘]/g, " ");
+  const rawWords = cleanText.split(/\s+/).filter(Boolean);
+  
+  const stopwords = [
+    'mujhe', 'show', 'dikhao', 'chahiye', 'hai', 'mera', 'under', 'budget', 'best', 'the', 'and', 'or', 'is', 'me', 'ka', 'ki', 'ke', 'se', 'ko', 'ye', 'yeh',
+    'dikhan', 'dikhana', 'dikhaye', 'dikhayein', 'dhoondo', 'find', 'search', 'list', 'lelo', 'kharidna', 'purchase', 'le', 'jo', 'ho', 'bhi', 'ek', 'ko', 'bhi', 'kuch', 'aur', 'nhi', 'sahi', 'hona',
+    'vs', 'versus', 'compare', 'with', 'about', 'information', 'details', 'detail'
+  ];
+
+  const tokens = [];
+  
+  for (const word of rawWords) {
+    const wordLower = word.toLowerCase();
+    
+    if (transliterateNonEnglishTokens[wordLower]) {
+      tokens.push(transliterateNonEnglishTokens[wordLower]);
+    } else if (transliterateNonEnglishTokens[word]) {
+      tokens.push(transliterateNonEnglishTokens[word]);
+    } else {
+      const normalizedWord = normalizeQueryText(wordLower);
+      if (normalizedWord && !stopwords.includes(normalizedWord)) {
+        tokens.push(normalizedWord);
+      }
+    }
+  }
+  
+  return [...new Set(tokens)];
+};
+
+// ─── RELEVANCE SEARCH QUERY BUILDER ───────────────────────────────────────────
+const buildRelevanceSearchQuery = (tokens, baseQuery = "SELECT id, name, category, price, stock, ratings, description, images", options = {}) => {
+  if (!tokens || tokens.length === 0) {
+    return {
+      query: `${baseQuery} FROM products WHERE stock > 0 ORDER BY ratings DESC LIMIT ${options.limit || 15}`,
+      params: []
+    };
+  }
+
+  const params = [];
+  const scoreParts = [];
+  
+  tokens.forEach((token, index) => {
+    params.push(`%${token.toLowerCase()}%`);
+    const pIdx = params.length;
+    
+    scoreParts.push(`
+      (CASE WHEN LOWER(name) ILIKE $${pIdx} THEN 10 ELSE 0 END) +
+      (CASE WHEN LOWER(category) ILIKE $${pIdx} THEN 5 ELSE 0 END) +
+      (CASE WHEN LOWER(description) ILIKE $${pIdx} THEN 2 ELSE 0 END)
+    `);
+  });
+
+  const scoreSql = `(${scoreParts.join(" + ")})`;
+  let query = `${baseQuery}, ${scoreSql} AS relevance_score FROM products WHERE stock > 0`;
+  
+  if (options.maxPrice) {
+    params.push(options.maxPrice);
+    query += ` AND price <= $${params.length}`;
+  }
+  if (options.category) {
+    params.push(`%${options.category.toLowerCase()}%`);
+    query += ` AND LOWER(category) ILIKE $${params.length}`;
+  }
+  if (options.color) {
+    params.push(`%${options.color.toLowerCase()}%`);
+    query += ` AND (LOWER(name) ILIKE $${params.length} OR LOWER(description) ILIKE $${params.length})`;
+  }
+
+  query += ` AND ${scoreSql} > 0`;
+
+  if (options.sortByPrice) {
+    query += ` ORDER BY relevance_score DESC, price ASC, ratings DESC`;
+  } else {
+    query += ` ORDER BY relevance_score DESC, ratings DESC`;
+  }
+  
+  query += ` LIMIT ${options.limit || 15}`;
+
+  return { query, params };
+};
+
 // ─── VOICE QUERY PARSER ───────────────────────────────────────────────────────
 const parseVoiceQuery = (msg) => {
-  const normalized = normalizeQueryText(msg);
-  const lower = normalized.toLowerCase();
+  const tokens = extractSearchTokens(msg);
+  const transliteratedMessage = tokens.join(" ");
+  const lower = transliteratedMessage.toLowerCase();
   let category = null, maxPrice = null, color = null, keyword = null;
 
   // Category detection for all 9 categories in database
-  if (/shoes|chappal|footwear|boot/.test(lower)) category = 'Footwear';
-  else if (/phone|mobile|smartphone|iphone|android|samsung|oneplus/.test(lower)) category = 'Mobiles';
-  else if (/laptop|computer|pc|television|tv|fridge|refrigerator|washing machine|ac|air conditioner|electronics|gadget/.test(lower)) category = 'Electronics';
-  else if (/shirt|kurta|saree|dress|clothes|fashion|kapde|jeans|tshirt/.test(lower)) category = 'Fashion';
-  else if (/sofa|furniture|chair|table|bed|curtain/.test(lower)) category = 'Home & Living';
-  else if (/watch|ghadi|necklace|ring|bag|backpack/.test(lower)) category = 'Accessories';
-  else if (/book|novel|comic|read|author|literature/.test(lower)) category = 'Books';
-  else if (/sports|bat|ball|cricket|football|gym|exercise|fitness|badminton/.test(lower)) category = 'Sports';
-  else if (/car|bike|motorcycle|helmet|automotive|tyre|cleaner|car wax/.test(lower)) category = 'Automotive';
-  else if (/grocery|food|snack|oil|biscuit|shampoo|soap|paste/.test(lower)) category = 'Grocery';
+  if (/\b(shoes|chappal|footwear|boot|shoe)\b/.test(lower)) category = 'Footwear';
+  else if (/\b(phone|mobile|smartphone|iphone|android|samsung|oneplus)\b/.test(lower)) category = 'Mobiles';
+  else if (/\b(laptop|computer|pc|television|tv|fridge|refrigerator|washing machine|ac|air conditioner|electronics|gadget)\b/.test(lower)) category = 'Electronics';
+  else if (/\b(shirt|kurta|saree|sari|dress|clothes|fashion|kapde|jeans|tshirt)\b/.test(lower)) category = 'Fashion';
+  else if (/\b(sofa|furniture|chair|table|bed|curtain)\b/.test(lower)) category = 'Home & Living';
+  else if (/\b(watch|ghadi|necklace|ring|bag|backpack)\b/.test(lower)) category = 'Accessories';
+  else if (/\b(book|novel|comic|read|author|literature|books)\b/.test(lower)) category = 'Books';
+  else if (/\b(sports|bat|ball|cricket|football|gym|exercise|fitness|badminton)\b/.test(lower)) category = 'Sports';
+  else if (/\b(car|bike|motorcycle|helmet|automotive|tyre|cleaner|car wax)\b/.test(lower)) category = 'Automotive';
+  else if (/\b(grocery|food|snack|oil|biscuit|shampoo|soap|paste)\b/.test(lower)) category = 'Grocery';
 
-  // Price detection — "under 2000", "2000 se kam", "budget 5000", or raw numbers (e.g. 20000)
-  const priceMatch = lower.match(/(?:under|below|upto|within|budget|se kam|tak)\s*(?:rs\.?|₹)?\s*(\d[\d,]*)/i);
+  // Price detection
+  const priceInput = (msg + " " + lower).toLowerCase();
+  const priceMatch = priceInput.match(/(?:under|below|upto|within|budget|se kam|tak|से कम|ಕಡಿಮೆ|కంటే తక్కువ|குறைவாக|കുറഞ്ഞ|કરતા ઓછું|ਤੋਂ ਘੱਟ|ଠାରು କମ୍|سے کم)\s*(?:rs\.?|₹)?\s*(\d[\d,]*)/i);
   if (priceMatch) {
     maxPrice = parseInt(priceMatch[1].replace(/,/g, ''));
   } else {
-    const rawNumberMatch = lower.match(/\b\d[\d,]*\b/);
+    const rawNumberMatch = priceInput.match(/\b\d[\d,]*\b/);
     if (rawNumberMatch) {
       const val = parseInt(rawNumberMatch[0].replace(/,/g, ''));
       if (val >= 100 && val <= 500000) {
@@ -103,20 +340,21 @@ const parseVoiceQuery = (msg) => {
   if (colorMatch) color = colorMatch[1];
 
   // General keyword (noun-ish)
-  const words = lower.replace(/[^\w\s]/g, '').split(/\s+/);
   const stopwords = [
     'mujhe', 'show', 'dikhao', 'chahiye', 'hai', 'mera', 'under', 'budget', 'best', 'the', 'and', 'or', 'is', 'me', 'ka', 'ki', 'ke', 'se', 'ko', 'ye', 'yeh',
     'dikhan', 'dikhana', 'dikhaye', 'dikhayein', 'dhoondo', 'find', 'search', 'list', 'lelo', 'kharidna', 'purchase', 'le', 'jo', 'ho', 'bhi', 'ek', 'ko', 'bhi', 'kuch', 'aur', 'nhi', 'sahi', 'hona'
   ];
-  keyword = words.find(w => w.length > 3 && !stopwords.includes(w));
+  keyword = tokens.find(w => w.length > 3 && !stopwords.includes(w) && w !== category?.toLowerCase() && w !== color);
+  if (!keyword) {
+    keyword = tokens.find(w => w.length > 2 && !stopwords.includes(w));
+  }
 
-  return { category, maxPrice, color, keyword };
+  return { category, maxPrice, color, keyword, tokens };
 };
 
 // ─── LOCAL FALLBACK NLP REASONING ENGINE (100% ONLINE ALWAYS) ──────────────────
 const generateLocalFallbackResponse = (message, emotion, products) => {
-  const normalized = normalizeQueryText(message);
-  const query = normalized.toLowerCase();
+  const query = message.toLowerCase();
   let reply = "";
   let productCard = null;
   let suggestedProducts = [];
@@ -129,10 +367,7 @@ const generateLocalFallbackResponse = (message, emotion, products) => {
   ];
 
   // Tokenize user message to extract search keywords
-  const queryWords = query
-    .replace(/[^\w\s]/g, '') // remove punctuation
-    .split(/\s+/)
-    .filter(w => w.length > 2 && !stopwords.includes(w));
+  const queryWords = extractSearchTokens(message);
 
   // 1. Scoring database products by matching token keywords
   let matched = [];
@@ -288,46 +523,25 @@ export const chatWithSalesman = catchAsyncErrors(async (req, res, next) => {
     const voiceIntent = parseVoiceQuery(message);
 
     // 2. Build smart product query based on intent
-    let productQuery = "SELECT id, name, category, price, stock, ratings, description, images FROM products WHERE stock > 0";
-    const queryParams = [];
+    const searchTokens = voiceIntent?.tokens || [];
+    const relevanceQuery = buildRelevanceSearchQuery(searchTokens, "SELECT id, name, category, price, stock, ratings, description, images", {
+      maxPrice: voiceIntent?.maxPrice,
+      category: voiceIntent?.category,
+      color: voiceIntent?.color,
+      sortByPrice: emotion === 'budget_conscious',
+      limit: 15
+    });
 
-    if (voiceIntent?.category) {
-      queryParams.push(`%${voiceIntent.category.toLowerCase()}%`);
-      productQuery += ` AND LOWER(category) ILIKE $${queryParams.length}`;
-    }
-    if (voiceIntent?.maxPrice) {
-      queryParams.push(voiceIntent.maxPrice);
-      productQuery += ` AND price <= $${queryParams.length}`;
-    }
-    if (voiceIntent?.keyword) {
-      queryParams.push(`%${voiceIntent.keyword.toLowerCase()}%`);
-      productQuery += ` AND (LOWER(name) ILIKE $${queryParams.length} OR LOWER(description) ILIKE $${queryParams.length} OR LOWER(category) ILIKE $${queryParams.length})`;
-    }
-    if (voiceIntent?.color) {
-      queryParams.push(`%${voiceIntent.color.toLowerCase()}%`);
-      productQuery += ` AND (LOWER(name) ILIKE $${queryParams.length} OR LOWER(description) ILIKE $${queryParams.length})`;
-    }
-    if (emotion === 'budget_conscious') {
-      productQuery += " ORDER BY price ASC";
-    } else {
-      productQuery += " ORDER BY ratings DESC";
-    }
-    productQuery += " LIMIT 15";
+    let productRes = await database.query(relevanceQuery.query, relevanceQuery.params.length > 0 ? relevanceQuery.params : undefined);
 
-    let productRes = await database.query(productQuery, queryParams.length > 0 ? queryParams : undefined);
-
-    // Broader search retry if no results were found matching restrictive filters
-    if (productRes.rows.length === 0 && voiceIntent?.keyword) {
-      let broadQuery = "SELECT id, name, category, price, stock, ratings, description, images FROM products WHERE stock > 0";
-      const broadParams = [];
-      broadParams.push(`%${voiceIntent.keyword.toLowerCase()}%`);
-      broadQuery += ` AND (LOWER(name) ILIKE $${broadParams.length} OR LOWER(description) ILIKE $${broadParams.length})`;
-      if (voiceIntent?.maxPrice) {
-        broadParams.push(voiceIntent.maxPrice);
-        broadQuery += ` AND price <= $${broadParams.length}`;
-      }
-      broadQuery += " ORDER BY ratings DESC LIMIT 15";
-      const broadRes = await database.query(broadQuery, broadParams);
+    // Retry with broader query if zero results found
+    if (productRes.rows.length === 0 && searchTokens.length > 0) {
+      const broadQuery = buildRelevanceSearchQuery(searchTokens, "SELECT id, name, category, price, stock, ratings, description, images", {
+        maxPrice: voiceIntent?.maxPrice,
+        sortByPrice: emotion === 'budget_conscious',
+        limit: 15
+      });
+      const broadRes = await database.query(broadQuery.query, broadQuery.params.length > 0 ? broadQuery.params : undefined);
       if (broadRes.rows.length > 0) {
         productRes = broadRes;
       }
@@ -462,43 +676,24 @@ export const voiceSearch = catchAsyncErrors(async (req, res, next) => {
   if (!transcript) return res.status(400).json({ success: false, message: "Transcript required" });
 
   const intent = parseVoiceQuery(transcript);
+  const searchTokens = intent.tokens || [];
 
-  let productQuery = "SELECT id, name, category, price, stock, ratings, images FROM products WHERE stock > 0";
-  const queryParams = [];
+  const relevanceQuery = buildRelevanceSearchQuery(searchTokens, "SELECT id, name, category, price, stock, ratings, images", {
+    maxPrice: intent.maxPrice,
+    category: intent.category,
+    color: intent.color,
+    limit: 8
+  });
 
-  if (intent.category) {
-    queryParams.push(`%${intent.category.toLowerCase()}%`);
-    productQuery += ` AND LOWER(category) ILIKE $${queryParams.length}`;
-  }
-  if (intent.maxPrice) {
-    queryParams.push(intent.maxPrice);
-    productQuery += ` AND price <= $${queryParams.length}`;
-  }
-  if (intent.keyword) {
-    queryParams.push(`%${intent.keyword.toLowerCase()}%`);
-    productQuery += ` AND (LOWER(name) ILIKE $${queryParams.length} OR LOWER(description) ILIKE $${queryParams.length} OR LOWER(category) ILIKE $${queryParams.length})`;
-  }
-  if (intent.color) {
-    queryParams.push(`%${intent.color.toLowerCase()}%`);
-    productQuery += ` AND (LOWER(name) ILIKE $${queryParams.length} OR LOWER(description) ILIKE $${queryParams.length})`;
-  }
+  let result = await database.query(relevanceQuery.query, relevanceQuery.params.length > 0 ? relevanceQuery.params : undefined);
 
-  productQuery += " ORDER BY ratings DESC LIMIT 8";
-
-  let result = await database.query(productQuery, queryParams.length > 0 ? queryParams : undefined);
-
-  // Broad fallback retry matching just the keyword
-  if (result.rows.length === 0 && intent.keyword) {
-    let broadQuery = "SELECT id, name, category, price, stock, ratings, images FROM products WHERE stock > 0";
-    const broadParams = [];
-    broadParams.push(`%${intent.keyword.toLowerCase()}%`);
-    broadQuery += ` AND (LOWER(name) ILIKE $${broadParams.length} OR LOWER(description) ILIKE $${broadParams.length})`;
-    if (intent.maxPrice) {
-      broadParams.push(intent.maxPrice);
-      broadQuery += ` AND price <= $${broadParams.length}`;
-    }
-    broadQuery += " ORDER BY ratings DESC LIMIT 8";
-    result = await database.query(broadQuery, broadParams);
+  // Broad fallback retry matching just the tokens
+  if (result.rows.length === 0 && searchTokens.length > 0) {
+    const broadQuery = buildRelevanceSearchQuery(searchTokens, "SELECT id, name, category, price, stock, ratings, images", {
+      maxPrice: intent.maxPrice,
+      limit: 8
+    });
+    result = await database.query(broadQuery.query, broadQuery.params.length > 0 ? broadQuery.params : undefined);
   }
 
   res.status(200).json({

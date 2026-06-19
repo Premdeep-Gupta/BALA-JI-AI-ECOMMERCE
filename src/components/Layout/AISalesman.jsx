@@ -19,14 +19,17 @@ const hasSpeechAPI = !!SpeechRecognitionAPI;
 
 // ─── TEXT-TO-SPEECH WITH DYNAMIC SCRIPT DETECTOR ────────────────────────────────
 const detectTextLanguage = (text) => {
-  if (/[\u0900-\u097F]/.test(text)) return 'hi-IN'; // Devanagari (Hindi, Marathi, etc.)
-  if (/[\u0980-\u09FF]/.test(text)) return 'bn-IN'; // Bengali
+  if (!text) return 'en-IN';
+  if (/[\u0900-\u097F]/.test(text)) return 'hi-IN'; // Devanagari (Hindi, Marathi, Sanskrit, Kashmiri, Nepali, Konkani, Dogri, Maithili, Bodo, Santali)
+  if (/[\u0980-\u09FF]/.test(text)) return 'bn-IN'; // Bengali script (Bengali, Assamese, Manipuri)
   if (/[\u0B80-\u0BFF]/.test(text)) return 'ta-IN'; // Tamil
   if (/[\u0C00-\u0C7F]/.test(text)) return 'te-IN'; // Telugu
   if (/[\u0C80-\u0CFF]/.test(text)) return 'kn-IN'; // Kannada
   if (/[\u0D00-\u0D7F]/.test(text)) return 'ml-IN'; // Malayalam
   if (/[\u0A80-\u0AFF]/.test(text)) return 'gu-IN'; // Gujarati
   if (/[\u0A00-\u0A7F]/.test(text)) return 'pa-IN'; // Gurmukhi (Punjabi)
+  if (/[\u0B00-\u0B7F]/.test(text)) return 'or-IN'; // Odia
+  if (/[\u0600-\u06FF]/.test(text)) return 'ur-IN'; // Arabic/Perso-Arabic (Urdu, Kashmiri Arabic script)
   return 'en-IN'; // Default English-India
 };
 
@@ -42,7 +45,7 @@ const speakText = (text) => {
   utter.volume = 0.95;
   
   const voices = window.speechSynthesis.getVoices();
-  const preferredVoice = voices.find(v => v.lang.startsWith(detectedLang.slice(0, 2)));
+  const preferredVoice = voices.find(v => v.lang.toLowerCase() === detectedLang.toLowerCase() || v.lang.startsWith(detectedLang.slice(0, 2)));
   if (preferredVoice) {
     utter.voice = preferredVoice;
   } else {
@@ -397,14 +400,29 @@ const AISalesman = () => {
     }
   }, [recognitionInstance]);
 
-  // LOCAL VOICE SEARCH REASONING ENGINE (200% WORKING)
+  // VOICE SEARCH REASONING ENGINE (INTEGRATED WITH BACKEND ROUTE & LOCAL FALLBACK)
   const handleVoiceSearch = async (transcript) => {
     if (!transcript.trim()) return;
     setIsVoiceSearching(true);
     setVoiceTranscript(transcript);
     
-    // Simulate smart voice search analyzer locally
-    setTimeout(() => {
+    try {
+      const res = await axiosInstance.post('/ai-salesman/voice-search', { transcript });
+      if (res.data.success) {
+        setVoiceResults({
+          success: true,
+          transcript,
+          products: res.data.products || [],
+          resultCount: res.data.resultCount || 0,
+        });
+
+        if (isSpeakerOn) {
+          const count = res.data.products?.length || 0;
+          speakText(`${count} products found for "${transcript}". Check them out!`);
+        }
+      }
+    } catch (err) {
+      console.warn("Backend voice search failed, falling back locally:", err.message);
       const query = transcript.toLowerCase();
       const matched = products.filter(p => 
         p.name?.toLowerCase().includes(query) || 
@@ -423,8 +441,9 @@ const AISalesman = () => {
         const count = matched.length;
         speakText(`${count} products found for "${transcript}". Check them out!`);
       }
+    } finally {
       setIsVoiceSearching(false);
-    }, 700);
+    }
   };
 
   // ── SEND CHAT MESSAGE & LOCAL NLP ENGINE FALLBACK ──
