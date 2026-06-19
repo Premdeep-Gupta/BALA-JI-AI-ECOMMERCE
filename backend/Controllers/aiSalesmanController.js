@@ -3,7 +3,7 @@ import database from "../database/db.js";
 
 // ─── SYSTEM PROMPT BUILDER ───────────────────────────────────────────────────
 const buildSystemPrompt = (productContext, conversationHistory, userMessage, emotionHint) => `
-You are "Aura", an advanced, emotionally-intelligent AI Sales Agent for BalajiMart — India's premium e-commerce platform.
+You are "Salesman", an advanced, emotionally-intelligent AI Sales Agent for BalajiMart — India's premium e-commerce platform.
 You are a human-like, premium sales expert who:
 - Speaks naturally in a blend of Hinglish and English.
 - Empathizes with the user's budget and sentiment.
@@ -38,7 +38,7 @@ RESPONSE FORMAT RULES (CRITICAL):
   [ACTION:{"type":"add_to_cart","product_id":"<id>"}]
 - You can include BOTH a PRODUCT_CARD and an ACTION if user is ready to buy.
 
-Respond now as Aura:
+Respond now as Salesman:
 `;
 
 // ─── EMOTION DETECTOR ─────────────────────────────────────────────────────────
@@ -132,7 +132,7 @@ const generateLocalFallbackResponse = (message, emotion, products) => {
     if (target) {
       reply = `Bilkul! Maine **${target.name}** ko aapke cart me add kar diya hai. Checkout karne ke liye top bar me cart open karein! 🛒`;
       cartAction = { type: "add_to_cart", product_id: target.id };
-      productCard = { id: target.id, name: target.name, price: target.price, category: target.category };
+      productCard = { id: target.id, name: target.name, price: target.price, category: target.category, images: target.images };
     } else {
       reply = "Aap kis product ko cart me add karna chahte hain? Please product ka name mention karein! 🛍️";
     }
@@ -208,31 +208,31 @@ const generateLocalFallbackResponse = (message, emotion, products) => {
     }
     
     reply = `Aapke budget (₹${maxPrice.toLocaleString()}) ke liye ye matching products best options hain! 💰 Aap special coupon **AURA10** apply karke checkout page par extra 10% discount le sakte hain!`;
-    suggestedProducts = budgetMatches.map(p => ({ id: p.id, name: p.name, price: p.price, category: p.category }));
+    suggestedProducts = budgetMatches.map(p => ({ id: p.id, name: p.name, price: p.price, category: p.category, images: p.images }));
   } 
   // Ask about product details / product opinion
   else if (matched.length > 0 && (query.includes("kaisa") || query.includes("about") || query.includes("review") || query.includes("opinion") || query.includes("puch") || query.includes("tell me") || query.includes("information") || query.includes("achha"))) {
     const target = matched[0];
     const ratingStr = target.ratings ? `⭐${target.ratings}/5` : "highly rated";
     reply = `**${target.name}** ek behtareen quality product hai category **${target.category}** me! Iski customer rating **${ratingStr}** hai, jo iski features aur user satisfaction ko confirm karti hai. Ye purchase ke liye ek perfect choice hai! Iske similar options niche cards me check kar sakte hain.`;
-    productCard = { id: target.id, name: target.name, price: target.price, category: target.category };
-    suggestedProducts = matched.slice(1, 4).map(p => ({ id: p.id, name: p.name, price: p.price, category: p.category }));
+    productCard = { id: target.id, name: target.name, price: target.price, category: target.category, images: target.images };
+    suggestedProducts = matched.slice(1, 4).map(p => ({ id: p.id, name: p.name, price: p.price, category: p.category, images: p.images }));
   }
   // Best Products search
   else if (query.includes("best") || query.includes("top rated") || query.includes("star") || query.includes("high rated")) {
     const topRated = [...products].sort((a, b) => (Number(b.ratings) || 0) - (Number(a.ratings) || 0)).slice(0, 3);
     reply = "Here are the top-rated items with stellar customer reviews in BalajiMart! ⭐ Ye quality aur durability ke liye number 1 choice hain.";
-    suggestedProducts = topRated.map(p => ({ id: p.id, name: p.name, price: p.price, category: p.category }));
+    suggestedProducts = topRated.map(p => ({ id: p.id, name: p.name, price: p.price, category: p.category, images: p.images }));
   } 
   // Regular search query with keyword matches
   else if (matched.length > 0) {
     reply = `Sure! Maine matching options filter kiye hain. **${matched[0].name}** is a great choice! 🚀 Aur similar product recommendation specifications niche verify kar sakte hain.`;
-    productCard = { id: matched[0].id, name: matched[0].name, price: matched[0].price, category: matched[0].category };
-    suggestedProducts = matched.slice(1, 4).map(p => ({ id: p.id, name: p.name, price: p.price, category: p.category }));
+    productCard = { id: matched[0].id, name: matched[0].name, price: matched[0].price, category: matched[0].category, images: matched[0].images };
+    suggestedProducts = matched.slice(1, 4).map(p => ({ id: p.id, name: p.name, price: p.price, category: p.category, images: p.images }));
   } 
   // Fallback Welcome
   else {
-    reply = "Namaste! Main BalajiMart ki AI assistant 'Aura' hoon. 🙏 Main aapko items find karne, comparisons compare karne, aur discounts unlock karne me help kar sakti hoon. Aap aaj kya purchase karna chahte hain? 🛍️";
+    reply = "Namaste! Main BalajiMart ki AI assistant 'Salesman' hoon. 🙏 Main aapko items find karne, comparisons compare karne, aur discounts unlock karne me help kar sakti hoon. Aap aaj kya purchase karna chahte hain? 🛍️";
   }
 
   return { reply, productCard, suggestedProducts, cartAction };
@@ -257,7 +257,7 @@ export const chatWithSalesman = catchAsyncErrors(async (req, res, next) => {
     const voiceIntent = parseVoiceQuery(message);
 
     // 2. Build smart product query based on intent
-    let productQuery = "SELECT id, name, category, price, stock, ratings, description FROM products WHERE stock > 0";
+    let productQuery = "SELECT id, name, category, price, stock, ratings, description, images FROM products WHERE stock > 0";
     const queryParams = [];
 
     if (voiceIntent?.category) {
@@ -287,7 +287,7 @@ export const chatWithSalesman = catchAsyncErrors(async (req, res, next) => {
 
     // Broader search retry if no results were found matching restrictive filters
     if (productRes.rows.length === 0 && voiceIntent?.keyword) {
-      let broadQuery = "SELECT id, name, category, price, stock, ratings, description FROM products WHERE stock > 0";
+      let broadQuery = "SELECT id, name, category, price, stock, ratings, description, images FROM products WHERE stock > 0";
       const broadParams = [];
       broadParams.push(`%${voiceIntent.keyword.toLowerCase()}%`);
       broadQuery += ` AND (LOWER(name) ILIKE $${broadParams.length} OR LOWER(description) ILIKE $${broadParams.length})`;
@@ -304,7 +304,7 @@ export const chatWithSalesman = catchAsyncErrors(async (req, res, next) => {
 
     // Ultimate fallback if still no results found
     if (productRes.rows.length === 0) {
-      const fallbackRes = await database.query("SELECT id, name, category, price, stock, ratings, description FROM products WHERE stock > 0 ORDER BY ratings DESC LIMIT 15");
+      const fallbackRes = await database.query("SELECT id, name, category, price, stock, ratings, description, images FROM products WHERE stock > 0 ORDER BY ratings DESC LIMIT 15");
       productRes = fallbackRes;
     }
     const productContext = productRes.rows
@@ -313,7 +313,7 @@ export const chatWithSalesman = catchAsyncErrors(async (req, res, next) => {
 
     // 3. Build conversation history string
     const convHistory = Array.isArray(context)
-      ? context.slice(-6).map(m => `${m.sender === 'user' ? 'Customer' : 'Aura'}: ${m.text}`).join('\n')
+      ? context.slice(-6).map(m => `${m.sender === 'user' ? 'Customer' : 'Salesman'}: ${m.text}`).join('\n')
       : String(context).slice(0, 500);
 
     // 4. Build system prompt
@@ -378,6 +378,12 @@ export const chatWithSalesman = catchAsyncErrors(async (req, res, next) => {
       try {
         productCard = JSON.parse(cardMatch[1]);
         cleanReply = cleanReply.replace(/\[PRODUCT_CARD:.*?\]/s, '').trim();
+        if (productCard && productCard.id) {
+          const matchedDbProduct = productRes.rows.find(r => r.id === productCard.id);
+          if (matchedDbProduct) {
+            productCard.images = matchedDbProduct.images;
+          }
+        }
       } catch (_) {}
     }
 
@@ -399,6 +405,7 @@ export const chatWithSalesman = catchAsyncErrors(async (req, res, next) => {
         category: p.category,
         price: p.price,
         ratings: p.ratings,
+        images: p.images,
       }));
     }
 

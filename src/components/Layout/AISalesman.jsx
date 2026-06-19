@@ -243,6 +243,7 @@ const VoiceResultsPanel = ({ results, intent, transcript, onAddToCart, onClose }
 const AISalesman = () => {
   const dispatch = useDispatch();
   const dragControls = useDragControls();
+  const constraintsRef = useRef(null);
   const { products = [] } = useSelector(state => state.product || {});
 
   const [isOpen, setIsOpen] = useState(false);
@@ -250,7 +251,7 @@ const AISalesman = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! 🙏 I am Aura — your premium AI Shopping Assistant. I can help you find the right products, set price filters, and compare products. What would you like to buy today? 🛍️",
+      text: "Hello! 🙏 I am Salesman — your premium AI Shopping Assistant. I can help you find the right products, set price filters, and compare products. What would you like to buy today? 🛍️",
       sender: 'ai',
       emotion: 'neutral',
     }
@@ -586,30 +587,33 @@ const AISalesman = () => {
             </div>
             {/* Tooltip */}
             <div className="absolute right-16 bottom-2 bg-slate-900 text-white text-xs font-black px-3 py-1.5 rounded-xl border border-white/10 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
-              🤖 Aura — AI Assistant
+              🤖 Salesman — AI Assistant
             </div>
           </motion.button>
         )}
       </AnimatePresence>
 
       {/* ── CHAT WINDOW ── */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 60, scale: 0.92 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 60, scale: 0.92 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            drag
-            dragControls={dragControls}
-            dragListener={false}
-            dragMomentum={false}
-            className="ai-salesman-panel fixed bottom-6 right-6 w-[360px] sm:w-[420px] max-w-[calc(100vw-32px)] h-[620px] max-h-[calc(100vh-48px)] z-50 flex flex-col rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
-            style={{
-              background: 'linear-gradient(145deg, #0d0d18 0%, #0f0f20 100%)',
-              boxShadow: '0 0 80px rgba(99,102,241,0.15), 0 30px 60px rgba(0,0,0,0.8)',
-            }}
-          >
+      <div ref={constraintsRef} className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 60, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 60, scale: 0.92 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              drag
+              dragConstraints={constraintsRef}
+              dragElastic={0}
+              dragControls={dragControls}
+              dragListener={false}
+              dragMomentum={false}
+              className="pointer-events-auto ai-salesman-panel fixed bottom-6 right-6 w-[360px] sm:w-[420px] max-w-[calc(100vw-32px)] h-[620px] max-h-[calc(100vh-48px)] flex flex-col rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
+              style={{
+                background: 'linear-gradient(145deg, #0d0d18 0%, #0f0f20 100%)',
+                boxShadow: '0 0 80px rgba(99,102,241,0.15), 0 30px 60px rgba(0,0,0,0.8)',
+              }}
+            >
             {/* ── HEADER ── */}
             <div 
               onPointerDown={(e) => dragControls.start(e)}
@@ -628,7 +632,7 @@ const AISalesman = () => {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-black text-white text-sm">Aura</h3>
+                    <h3 className="font-black text-white text-sm">Salesman</h3>
                     <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full border ${emotionStyle.bg} ${emotionStyle.color} ${emotionStyle.border}`}>
                       {emotionStyle.label}
                     </span>
@@ -750,7 +754,7 @@ const AISalesman = () => {
                         <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" />
                         <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }} />
                         <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }} />
-                        <span className="text-[10px] text-slate-400 font-medium ml-1">Aura is thinking...</span>
+                        <span className="text-[10px] text-slate-400 font-medium ml-1">Salesman is thinking...</span>
                       </div>
                     </motion.div>
                   )}
@@ -924,6 +928,7 @@ const AISalesman = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </>
   );
 };
