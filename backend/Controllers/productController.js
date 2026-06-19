@@ -758,12 +758,12 @@ export const cameraSearch = catchAsyncErrors(async (req, res, next) => {
         parsedImage.keywords = Array.from(mergedKeywords);
       }
     }
-    const { category, keywords } = parsedImage;
-    console.log("📸 Visual Search parsed:", { category, keywords, isFallback });
+    const { category, keywords = [], brands = [], ocrText = "", color = "" } = parsedImage;
+    console.log("📸 Visual Search parsed:", { category, keywords, brands, ocrText, color, isFallback });
 
-    if (!category && (!keywords || keywords.length === 0)) {
+    if (!category && keywords.length === 0 && brands.length === 0 && !ocrText && !color) {
       await fs.remove(imageFile.tempFilePath);
-      // Return top rated products as fallback suggestions, with low confidence matchPct (preventing direct redirects)
+      // Return top rated products as fallback suggestions
       const fallbackQuery = `
         SELECT ${PRODUCT_SELECT_FIELDS}, COUNT(r.id) AS review_count
         FROM products p
@@ -789,18 +789,44 @@ export const cameraSearch = catchAsyncErrors(async (req, res, next) => {
     let relevanceSelect = "";
     const scores = [];
 
-    // Category relevance boost (instead of strict WHERE filter)
+    // Category relevance boost
     if (category) {
       scores.push(`(CASE WHEN p.category = $${index} THEN 15 ELSE 0 END)`);
       values.push(category);
       index++;
     }
 
+    // Brand matching boost
+    if (brands && brands.length > 0) {
+      brands.forEach(brand => {
+        scores.push(`(CASE WHEN (p.name ILIKE $${index} OR p.description ILIKE $${index} OR p.sub_category ILIKE $${index}) THEN 20 ELSE 0 END)`);
+        values.push(`%${brand}%`);
+        index++;
+      });
+    }
+
+    // Color matching boost
+    if (color) {
+      scores.push(`(CASE WHEN (p.name ILIKE $${index} OR p.description ILIKE $${index}) THEN 15 ELSE 0 END)`);
+      values.push(`%${color}%`);
+      index++;
+    }
+
+    // OCR text matching boost
+    if (ocrText && ocrText.trim().length > 2) {
+      const ocrWords = ocrText.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+      ocrWords.forEach(word => {
+        scores.push(`(CASE WHEN (p.name ILIKE $${index} OR p.description ILIKE $${index}) THEN 15 ELSE 0 END)`);
+        values.push(`%${word}%`);
+        index++;
+      });
+    }
+
     // Filter by matching keywords and build relevance score
     if (keywords && keywords.length > 0) {
       const keywordConditions = [];
       keywords.forEach(kw => {
-        keywordConditions.push(`(p.name ILIKE $${index} OR p.description ILIKE $${index})`);
+        keywordConditions.push(`(p.name ILIKE $${index} OR p.description ILIKE $${index} OR p.category ILIKE $${index})`);
         values.push(`%${kw}%`);
         index++;
         
@@ -824,13 +850,15 @@ export const cameraSearch = catchAsyncErrors(async (req, res, next) => {
 
     const query = `
       SELECT ${PRODUCT_SELECT_FIELDS}, 
-      COUNT(r.id) AS review_count
+      COUNT(r.id) AS review_count,
+      MAX(COALESCE(ps.visual_search_clicks, 0)) as past_clicks
       ${relevanceSelect}
       FROM products p
       LEFT JOIN reviews r ON p.id = r.product_id
+      LEFT JOIN product_stats ps ON p.id = ps.product_id
       ${whereClause}
       GROUP BY p.id
-      ORDER BY relevance_score DESC, p.created_at DESC
+      ORDER BY (relevance_score + MAX(COALESCE(ps.visual_search_clicks, 0)) * 5) DESC, p.created_at DESC
       LIMIT 12
     `;
 
@@ -842,12 +870,15 @@ export const cameraSearch = catchAsyncErrors(async (req, res, next) => {
     // Map match percentages
     const mappedProducts = result.rows.map((product, idx) => {
       const relevance = parseInt(product.relevance_score) || 0;
+      const clicks = parseInt(product.past_clicks) || 0;
+      const totalScore = relevance + clicks * 5;
+      
       let matchPct = 95 - idx * 4;
-      if (relevance > 0) {
-        if (idx === 0 && relevance >= 15) {
+      if (totalScore > 0) {
+        if (idx === 0 && totalScore >= 15) {
           matchPct = 100;
         } else {
-          matchPct = Math.min(99, 70 + Math.min(29, relevance * 3));
+          matchPct = Math.min(99, 70 + Math.min(29, totalScore * 3));
         }
       }
       return {
@@ -860,6 +891,9 @@ export const cameraSearch = catchAsyncErrors(async (req, res, next) => {
       success: true,
       category,
       keywords,
+      brands,
+      ocrText,
+      color,
       isFallback,
       products: mappedProducts
     });

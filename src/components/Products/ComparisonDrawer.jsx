@@ -3,6 +3,7 @@ import { X, Sparkles, Scale, AlertCircle, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
+import { secureUrl } from "../../utils/urlHelper";
 
 const ComparisonDrawer = () => {
   const [compareList, setCompareList] = useState([]);
@@ -115,7 +116,7 @@ const ComparisonDrawer = () => {
                       {compareList.map((product) => (
                         <th key={product.id || product._id} className="py-4 px-4 text-white font-black text-sm">
                           <div className="flex items-center gap-3">
-                            <img src={product.image || "/no-image.png"} className="w-12 h-12 object-cover rounded-lg border border-white/10" alt="" />
+                            <img src={secureUrl(product.image) || "/no-image.png"} className="w-12 h-12 object-cover rounded-lg border border-white/10" alt="" />
                             <div className="min-w-0">
                               <h4 className="line-clamp-1">{product.name}</h4>
                               <span className="text-[9px] font-black text-indigo-300 uppercase tracking-widest">{product.category}</span>

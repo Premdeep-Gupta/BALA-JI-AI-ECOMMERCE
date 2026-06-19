@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { toggleSearchBar } from "../../store/slices/popupSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import { axiosInstance } from "../../lib/axios";
+import { getSecureProductImage } from "../../utils/urlHelper";
 
 // ============================================================
 // 🌐 MEGA ALIAS DICTIONARY — Hindi + English Nicknames
@@ -419,18 +420,7 @@ const SearchOverlay = () => {
   }, [isSearchBarOpen]);
 
   const getProductImage = (product) => {
-    if (!product || !product.images) return null;
-    let parsed = [];
-    try {
-      parsed = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
-    } catch (_) {}
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed[0]?.url || parsed[0];
-    }
-    if (typeof product.images === 'string' && product.images.startsWith('http')) {
-      return product.images;
-    }
-    return null;
+    return getSecureProductImage(product);
   };
 
   // ── Smart suggestions engine (Live API Autocomplete)
@@ -507,6 +497,19 @@ const SearchOverlay = () => {
   }, [searchQuery, dispatch, navigate]);
 
   // ── Voice search
+  const speakFeedback = (text) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "hi-IN";
+    utter.rate = 1.05;
+    utter.pitch = 1.1;
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice = voices.find(v => v.lang.includes("hi-IN") || v.lang.includes("en-IN") || v.name.includes("Google Hindi"));
+    if (preferredVoice) utter.voice = preferredVoice;
+    window.speechSynthesis.speak(utter);
+  };
+
   const handleVoiceSearch = () => {
     if (isListening) {
       recognitionRef.current?.stop();
@@ -539,6 +542,7 @@ const SearchOverlay = () => {
       if (final) {
         setSearchQuery(final);
         setVoiceTranscript("");
+        speakFeedback(`Sir, maine aapke liye ${final} search kar diya hai.`);
         setTimeout(() => handleSearch(final), 400);
       }
     };

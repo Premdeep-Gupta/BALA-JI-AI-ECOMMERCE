@@ -111,47 +111,54 @@ const VoiceVisualizer = ({ isListening }) => {
 };
 
 // ─── PRODUCT CARD (inline in chat) ───────────────────────────────────────────
-const InlineProductCard = ({ product, onAddToCart }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 10, scale: 0.97 }}
-    animate={{ opacity: 1, y: 0, scale: 1 }}
-    className="mt-2 bg-white/5 border border-white/15 rounded-2xl overflow-hidden hover:border-indigo-500/50 transition group"
-  >
-    <div className="p-3 flex items-center gap-3">
-      <div className="w-14 h-14 rounded-xl bg-indigo-500/10 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden">
-        <Package size={22} className="text-indigo-400" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-black text-white line-clamp-1">{product.name}</p>
-        <p className="text-[10px] font-bold text-slate-400 mt-0.5">{product.category}</p>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-sm font-black text-indigo-300">₹{Number(product.price).toLocaleString('en-IN')}</span>
-          {product.ratings && (
-            <span className="flex items-center gap-0.5 text-[9px] font-bold text-amber-400">
-              <Star size={9} fill="currentColor" /> {Number(product.ratings).toFixed(1)}
-            </span>
+const InlineProductCard = ({ product, onAddToCart }) => {
+  const imgSrc = getSecureProductImage(product);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      className="mt-2 bg-white/5 border border-white/15 rounded-2xl overflow-hidden hover:border-indigo-500/50 transition group"
+    >
+      <div className="p-3 flex items-center gap-3">
+        <div className="w-14 h-14 rounded-xl bg-indigo-500/10 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden">
+          {imgSrc ? (
+            <img src={imgSrc} alt={product.name} className="w-full h-full object-cover" />
+          ) : (
+            <Package size={22} className="text-indigo-400" />
           )}
         </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-black text-white line-clamp-1">{product.name}</p>
+          <p className="text-[10px] font-bold text-slate-400 mt-0.5">{product.category}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-sm font-black text-indigo-300">₹{Number(product.price).toLocaleString('en-IN')}</span>
+            {product.ratings && (
+              <span className="flex items-center gap-0.5 text-[9px] font-bold text-amber-400">
+                <Star size={9} fill="currentColor" /> {Number(product.ratings).toFixed(1)}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-col gap-1.5 shrink-0">
+          <button
+            onClick={() => onAddToCart(product)}
+            className="p-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition shadow-lg shadow-indigo-600/20"
+            title="Add to Cart"
+          >
+            <ShoppingCart size={13} />
+          </button>
+          <Link
+            to={`/product/${product.id || product._id}`}
+            className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition flex items-center justify-center"
+            title="View Product"
+          >
+            <ArrowRight size={13} />
+          </Link>
+        </div>
       </div>
-      <div className="flex flex-col gap-1.5 shrink-0">
-        <button
-          onClick={() => onAddToCart(product)}
-          className="p-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition shadow-lg shadow-indigo-600/20"
-          title="Add to Cart"
-        >
-          <ShoppingCart size={13} />
-        </button>
-        <Link
-          to={`/product/${product.id || product._id}`}
-          className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition flex items-center justify-center"
-          title="View Product"
-        >
-          <ArrowRight size={13} />
-        </Link>
-      </div>
-    </div>
-  </motion.div>
-);
+    </motion.div>
+  );
+};
 
 // ─── VOICE SEARCH RESULTS PANEL ───────────────────────────────────────────────
 const VoiceResultsPanel = ({ results, intent, transcript, onAddToCart, onClose }) => (
@@ -183,35 +190,42 @@ const VoiceResultsPanel = ({ results, intent, transcript, onAddToCart, onClose }
           No products found matching your voice query. Try a different search!
         </div>
       ) : (
-        results.map(product => (
-          <div key={product.id || product._id} className="flex items-center gap-3 p-2.5 bg-white/5 border border-white/10 rounded-xl hover:border-indigo-500/40 transition group">
-            <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-white/10 flex items-center justify-center shrink-0">
-              <Package size={18} className="text-indigo-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-black text-white line-clamp-1">{product.name}</p>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-xs font-black text-indigo-300">₹{Number(product.price).toLocaleString('en-IN')}</span>
-                {product.ratings && (
-                  <span className="text-[9px] text-amber-400 font-bold flex items-center gap-0.5">
-                    <Star size={9} fill="currentColor" /> {Number(product.ratings).toFixed(1)}
-                  </span>
+        results.map(product => {
+          const imgSrc = getSecureProductImage(product);
+          return (
+            <div key={product.id || product._id} className="flex items-center gap-3 p-2.5 bg-white/5 border border-white/10 rounded-xl hover:border-indigo-500/40 transition group">
+              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden">
+                {imgSrc ? (
+                  <img src={imgSrc} alt={product.name} className="w-full h-full object-cover" />
+                ) : (
+                  <Package size={18} className="text-indigo-400" />
                 )}
               </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-black text-white line-clamp-1">{product.name}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-xs font-black text-indigo-300">₹{Number(product.price).toLocaleString('en-IN')}</span>
+                  {product.ratings && (
+                    <span className="text-[9px] text-amber-400 font-bold flex items-center gap-0.5">
+                      <Star size={9} fill="currentColor" /> {Number(product.ratings).toFixed(1)}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition shrink-0">
+                <button
+                  onClick={() => onAddToCart(product)}
+                  className="p-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition"
+                >
+                  <ShoppingCart size={12} />
+                </button>
+                <Link to={`/product/${product.id || product._id}`} className="p-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg transition">
+                  <ArrowRight size={12} />
+                </Link>
+              </div>
             </div>
-            <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition shrink-0">
-              <button
-                onClick={() => onAddToCart(product)}
-                className="p-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition"
-              >
-                <ShoppingCart size={12} />
-              </button>
-              <Link to={`/product/${product.id || product._id}`} className="p-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg transition">
-                <ArrowRight size={12} />
-              </Link>
-            </div>
-          </div>
-        ))
+          );
+        })
       )}
     </div>
     <div className="p-3 border-t border-white/10 text-center">
@@ -268,6 +282,54 @@ const AISalesman = () => {
     dispatch(toggleCart());
     toast.success(`🛒 ${product.name} added to cart!`);
   }, [dispatch]);
+
+  // ── AUTO COMPARISON QUEUE ──
+  const autoQueueForComparison = useCallback((suggestedList) => {
+    if (!suggestedList || suggestedList.length < 2) return;
+    try {
+      const existing = JSON.parse(localStorage.getItem("ai_compare_queue")) || [];
+      let updated = [...existing];
+      
+      suggestedList.forEach(product => {
+        const prodId = product.id || product._id;
+        if (!prodId) return;
+        const alreadyAdded = updated.some(p => p.id === prodId || p._id === prodId);
+        if (!alreadyAdded) {
+          const fullProd = products.find(p => String(p.id || p._id) === String(prodId)) || product;
+          
+          let firstImage = "/no-image.png";
+          if (fullProd.images) {
+            try {
+              const imgs = typeof fullProd.images === "string" ? JSON.parse(fullProd.images) : fullProd.images;
+              if (Array.isArray(imgs) && imgs.length > 0) {
+                firstImage = imgs[0]?.url || imgs[0] || "/no-image.png";
+              }
+            } catch (_) {}
+          } else if (fullProd.image) {
+            firstImage = fullProd.image;
+          }
+
+          updated.push({
+            id: prodId,
+            name: fullProd.name,
+            image: firstImage,
+            price: fullProd.price,
+            ratings: fullProd.ratings,
+            category: fullProd.category,
+            stock: fullProd.stock,
+            offer_type: fullProd.offer_type,
+          });
+        }
+      });
+
+      // Limit to 3 max
+      updated = updated.slice(0, 3);
+      localStorage.setItem("ai_compare_queue", JSON.stringify(updated));
+      toast.success("AI has automatically queued items for comparison! ⚖️");
+    } catch (err) {
+      console.warn("Auto compare queue synchronization failed:", err.message);
+    }
+  }, [products]);
 
   // ── VOICE RECOGNITION ──
   const startListening = useCallback(() => {
@@ -364,6 +426,10 @@ const AISalesman = () => {
         const { reply, emotion, productCard, cartAction, suggestedProducts } = res.data;
         setCurrentEmotion(emotion || 'neutral');
 
+        if (emotion === 'comparing' && suggestedProducts?.length >= 2) {
+          autoQueueForComparison(suggestedProducts);
+        }
+
         const aiMsg = {
           id: Date.now() + 1,
           text: reply,
@@ -448,6 +514,9 @@ const AISalesman = () => {
       
       setTimeout(() => {
         setCurrentEmotion(emotion);
+        if (emotion === 'comparing' && suggestedProducts?.length >= 2) {
+          autoQueueForComparison(suggestedProducts);
+        }
         const aiMsg = {
           id: Date.now() + 1,
           text: reply,

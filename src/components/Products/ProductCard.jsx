@@ -6,6 +6,7 @@ import { addToCart } from "../../store/slices/cartSlice";
 import { toggleWishlist } from "../../store/slices/wishlistSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
+import { secureUrl } from "../../utils/urlHelper";
 
 const ProductCard = ({ product, isList }) => {
   const dispatch = useDispatch();
@@ -26,9 +27,12 @@ const ProductCard = ({ product, isList }) => {
   const getImages = () => {
     if (!product.images) return [];
     try {
-      return typeof product.images === "string"
+      const parsed = typeof product.images === "string"
         ? JSON.parse(product.images)
         : product.images;
+      return Array.isArray(parsed)
+        ? parsed.map(img => typeof img === "string" ? { url: secureUrl(img) } : { ...img, url: secureUrl(img?.url) })
+        : [];
     } catch {
       return [];
     }
