@@ -764,9 +764,41 @@ const SearchOverlay = () => {
 
   return (
     <div className="fixed inset-0 z-[999] flex items-start justify-center pt-8 px-4">
+      {/* Dynamic Keyframes Styling */}
+      <style>{`
+        @keyframes scan-laser {
+          0% { top: 0%; opacity: 0.6; }
+          50% { top: 100%; opacity: 1; }
+          100% { top: 0%; opacity: 0.6; }
+        }
+        .animate-scan-laser {
+          position: absolute;
+          animation: scan-laser 3s infinite linear;
+        }
+        @keyframes aura-pulse {
+          0% { box-shadow: 0 0 10px rgba(99,102,241,0.2), 0 0 20px rgba(99,102,241,0.1); }
+          50% { box-shadow: 0 0 25px rgba(99,102,241,0.45), 0 0 45px rgba(99,102,241,0.2); }
+          100% { box-shadow: 0 0 10px rgba(99,102,241,0.2), 0 0 20px rgba(99,102,241,0.1); }
+        }
+        .animate-aura-pulse {
+          animation: aura-pulse 3s infinite ease-in-out;
+        }
+        .scrollbar-futuristic::-webkit-scrollbar {
+          width: 4px;
+        }
+        .scrollbar-futuristic::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.02);
+          border-radius: 99px;
+        }
+        .scrollbar-futuristic::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, var(--primary), #6366f1);
+          border-radius: 99px;
+        }
+      `}</style>
+
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-slate-950/75 backdrop-blur-[12px] transition-all duration-300"
         onClick={closeOverlay}
       />
 
@@ -778,31 +810,39 @@ const SearchOverlay = () => {
           transition={{ duration: 0.22, ease: "easeOut" }}
         >
           {/* ── MAIN SEARCH CARD ── */}
-          <div className="relative rounded-[20px] overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.5)]"
+          <div className="relative rounded-[24px] overflow-hidden border border-white/[0.08] backdrop-blur-[24px] shadow-[0_30px_100px_rgba(0,0,0,0.85),_0_0_50px_rgba(99,102,241,0.1)] bg-slate-900/75"
             style={{
-              background: "linear-gradient(135deg, rgba(15,15,30,0.97) 0%, rgba(10,10,25,0.99) 100%)",
-              border: "1px solid color-mix(in srgb, var(--primary) 20%, transparent)",
+              background: "linear-gradient(135deg, rgba(17, 18, 36, 0.8) 0%, rgba(10, 11, 22, 0.95) 100%)",
             }}
           >
-            {/* Glow top */}
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--primary)]/60 to-transparent" />
+            {/* Ambient Background Glow Blobs */}
+            <div className="absolute -z-10 -top-32 -left-32 w-80 h-80 bg-[var(--primary)]/15 rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDuration: '8s' }} />
+            <div className="absolute -z-10 -bottom-32 -right-32 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDuration: '10s' }} />
+            
+            {/* Glow top border */}
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[var(--primary)]/60 to-transparent" />
 
             {/* Header */}
-            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[var(--primary)] to-[color-mix(in srgb,var(--primary)_80%,black)] flex items-center justify-center shadow-lg shadow-[var(--primary)]/20">
-                  <Sparkles size={13} className="text-white" />
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06] bg-slate-950/30 relative">
+              <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[var(--primary)]/30 to-transparent pointer-events-none" />
+              
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[var(--primary)] to-indigo-600 flex items-center justify-center shadow-lg shadow-[var(--primary)]/20 animate-aura-pulse">
+                  <Sparkles size={14} className="text-white animate-spin" style={{ animationDuration: '8s' }} />
                 </div>
                 <div>
-                  <p className="text-white text-[11px] font-black tracking-[0.12em] uppercase">Smart Search Engine</p>
-                  <p className="text-[var(--primary)]/60 text-[9px] font-semibold tracking-widest uppercase">AI · Multi-Language · Visual Search</p>
+                  <p className="text-white text-[12px] font-black tracking-[0.15em] uppercase flex items-center gap-1.5">
+                    Smart Search Engine
+                    <span className="text-[7px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded tracking-widest uppercase">PRO</span>
+                  </p>
+                  <p className="text-[var(--primary)]/70 text-[9px] font-bold tracking-[0.2em] uppercase mt-0.5">AURA AI · MULTI-LINGUAL COGNITIVE CORE</p>
                 </div>
               </div>
               <button
                 onClick={closeOverlay}
-                className="w-7 h-7 rounded-xl bg-white/5 hover:bg-red-500/20 border border-white/8 hover:border-red-500/30 flex items-center justify-center text-slate-400 hover:text-red-400 transition-all duration-200"
+                className="w-8 h-8 rounded-xl bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 flex items-center justify-center text-slate-400 hover:text-red-400 transition-all duration-200 active:scale-95 shadow-sm"
               >
-                <X size={13} />
+                <X size={14} />
               </button>
             </div>
 
@@ -813,55 +853,58 @@ const SearchOverlay = () => {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="border-b border-white/[0.06]"
+                  className="border-b border-white/[0.06] bg-gradient-to-b from-white/[0.01] to-transparent"
                 >
-                  <div className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="p-5">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                       {/* Image preview */}
-                      <div className="relative rounded-2xl overflow-hidden bg-black/40 border border-white/10 aspect-video flex items-center justify-center">
+                      <div className="md:col-span-5 relative rounded-2xl overflow-hidden bg-black/60 border border-white/10 aspect-square flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.5)]">
                         {scanImage && (
                           <img src={scanImage} className="w-full h-full object-cover" alt="scan" />
                         )}
-                        {/* Scanning grid overlay */}
-                        {scanProgress < 100 && (
-                          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                            <div className="absolute inset-0 bg-[linear-gradient(color-mix(in srgb,var(--primary)_5%,transparent)_1px,transparent_1px),linear-gradient(90deg,color-mix(in srgb,var(--primary)_5%,transparent)_1px,transparent_1px)] bg-[size:10px_10px]" />
-                            <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[var(--primary)] to-transparent blur-[2px]" style={{ top: `${(scanProgress / 100) * 100}%`, transition: "top 0.4s ease" }} />
-                            <div className="absolute left-0 right-0 h-12 bg-gradient-to-b from-[var(--primary)]/10 to-transparent opacity-60" style={{ top: `${(scanProgress / 100) * 100}%`, transition: "top 0.4s ease", transform: "translateY(-100%)" }} />
-                          </div>
-                        )}
+                        {/* Scanning grid overlay & continuous laser sweep */}
+                        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                          <div className="absolute inset-0 bg-[linear-gradient(rgba(99,102,241,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,0.03)_1px,transparent_1px)] bg-[size:16px_16px]" />
+                          <div className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[var(--primary)] to-transparent blur-[0.5px] shadow-[0_0_10px_var(--primary),_0_0_20px_var(--primary)] animate-scan-laser" />
+                        </div>
                         {/* Corner brackets */}
-                        <div className="absolute top-2 left-2 w-5 h-5 border-t-2 border-l-2 border-[var(--primary)]/70 rounded-tl-sm animate-pulse" />
-                        <div className="absolute top-2 right-2 w-5 h-5 border-t-2 border-r-2 border-[var(--primary)]/70 rounded-tr-sm animate-pulse" />
-                        <div className="absolute bottom-2 left-2 w-5 h-5 border-b-2 border-l-2 border-[var(--primary)]/70 rounded-bl-sm animate-pulse" />
-                        <div className="absolute bottom-2 right-2 w-5 h-5 border-b-2 border-r-2 border-[var(--primary)]/70 rounded-br-sm animate-pulse" />
+                        <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-[var(--primary)] rounded-tl-md shadow-[0_0_5px_var(--primary)]" />
+                        <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-[var(--primary)] rounded-tr-md shadow-[0_0_5px_var(--primary)]" />
+                        <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-[var(--primary)] rounded-bl-md shadow-[0_0_5px_var(--primary)]" />
+                        <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-[var(--primary)] rounded-br-md shadow-[0_0_5px_var(--primary)]" />
+                        <div className="absolute inset-0 shadow-[inset_0_0_40px_rgba(0,0,0,0.8)] pointer-events-none" />
                       </div>
 
                       {/* Scan results */}
-                      <div className="flex flex-col justify-between space-y-4">
+                      <div className="md:col-span-7 flex flex-col justify-between space-y-4 h-full">
                         {/* Progress bar */}
-                        <div>
-                          <div className="flex items-center gap-1.5 mb-1.5">
-                            <RefreshCw size={10} className={`text-[var(--primary)] ${scanProgress < 100 ? "animate-spin" : ""}`} />
-                            <span className="text-[9px] font-black uppercase tracking-wider text-[var(--primary)]">Neural Scan</span>
-                            <span className="ml-auto text-[9px] font-mono font-black text-white">{scanProgress}%</span>
+                        <div className="bg-white/[0.02] border border-white/[0.04] p-4 rounded-2xl shadow-inner relative overflow-hidden">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <RefreshCw size={11} className={`text-[var(--primary)] ${scanProgress < 100 ? "animate-spin" : ""}`} />
+                            <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[var(--primary)]">AURA AI COGNITIVE SCAN</span>
+                            <span className="ml-auto text-[10px] font-mono font-black text-white bg-white/10 px-2 py-0.5 rounded-md">{scanProgress}%</span>
                           </div>
-                          <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden relative shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
                             <div
-                              className="h-full bg-gradient-to-r from-[var(--primary)] to-[color-mix(in srgb,var(--primary)_70%,black)] rounded-full transition-all duration-500"
+                              className="h-full bg-gradient-to-r from-[var(--primary)] via-indigo-500 to-[var(--primary)] rounded-full transition-all duration-500 shadow-[0_0_8px_var(--primary)]"
                               style={{ width: `${scanProgress}%` }}
                             />
                           </div>
-                          <p className="text-[9px] text-slate-400 mt-1 font-semibold leading-relaxed">{scanStage}</p>
+                          <div className="flex items-center justify-between mt-2">
+                            <p className="text-[10px] font-mono uppercase tracking-wider text-slate-400 leading-relaxed truncate max-w-[80%]">{scanStage}</p>
+                            {scanProgress === 100 && (
+                              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">Sync Ready</span>
+                            )}
+                          </div>
                         </div>
 
                         {scanResults.length > 0 && (
-                          <div className="space-y-2">
-                            <p className="text-[9px] font-black uppercase tracking-[0.15em] text-[var(--primary)]/60 flex items-center gap-1">
-                              <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--primary)] animate-ping" />
-                              Visual Matches:
+                          <div className="space-y-3">
+                            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 flex items-center gap-2">
+                              <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse" />
+                              Visual Matches Identified:
                             </p>
-                            <div className="grid grid-cols-1 gap-2.5 max-h-[160px] overflow-y-auto pr-1.5 scrollbar-thin scrollbar-track-white/5 scrollbar-thumb-[var(--primary)]/30">
+                            <div className="grid grid-cols-1 gap-2.5 max-h-[220px] overflow-y-auto pr-1 scrollbar-futuristic">
                               {scanResults.map((item, idx) => {
                                 const imgSrc = getProductImage(item);
 
@@ -874,55 +917,59 @@ const SearchOverlay = () => {
                                       dispatch(toggleSearchBar());
                                       navigate(`/product/${item._id || item.id}`);
                                     }}
-                                    className="group relative flex items-start gap-3 p-2 bg-white/[0.03] hover:bg-[var(--primary)]/10 border border-white/[0.06] hover:border-[var(--primary)]/30 rounded-xl transition-all duration-300 cursor-pointer hover:-translate-y-0.5 shadow-md"
+                                    className="group relative flex items-start gap-4 p-2.5 bg-slate-950/20 hover:bg-slate-900/50 hover:shadow-[0_0_20px_color-mix(in srgb,var(--primary)_15%,transparent)] border border-white/[0.04] hover:border-[var(--primary)]/30 rounded-2xl transition-all duration-300 cursor-pointer hover:-translate-y-1 shadow-[0_4px_12px_rgba(0,0,0,0.15)] overflow-hidden"
                                   >
                                     {/* Image with discount */}
-                                    <div className="relative shrink-0 w-14 h-14 rounded-lg overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center">
+                                    <div className="relative shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center shadow-inner">
                                       {imgSrc && (
-                                        <img src={imgSrc} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                                        <img src={imgSrc} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                       )}
                                       {item.discount_percentage > 0 && (
-                                        <div className="absolute top-0.5 left-0.5 bg-rose-600 text-white text-[6px] font-black px-1 py-0.5 rounded uppercase tracking-wider">
-                                          {item.discount_percentage}%
+                                        <div className="absolute top-1 left-1 bg-gradient-to-r from-red-500 to-rose-600 text-white text-[7px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider shadow">
+                                          -{item.discount_percentage}%
                                         </div>
                                       )}
                                     </div>
 
                                     {/* Product Details */}
-                                    <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 h-14">
+                                    <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 h-16">
                                       <div>
-                                        <div className="flex items-center gap-1 mb-0.5">
-                                          <span className="w-1 h-1 rounded-full bg-[var(--primary)]" />
-                                          <span className="text-[7px] font-black uppercase tracking-widest text-[var(--primary)]/80">Balaji Mart</span>
+                                        <div className="flex items-center gap-1.5 mb-1">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] shadow-[0_0_4px_var(--primary)] animate-pulse" />
+                                          <span className="text-[8px] font-black uppercase tracking-[0.15em] text-[var(--primary)]">Balaji Mart</span>
                                           {item.ratings && (
-                                            <span className="ml-auto text-[7px] font-bold text-amber-400 flex items-center gap-0.5">
+                                            <span className="ml-auto text-[8px] font-bold text-amber-400 flex items-center gap-0.5">
                                               ★ {Number(item.ratings).toFixed(1)}
                                             </span>
                                           )}
                                         </div>
-                                        <h4 className="text-[9px] font-bold text-slate-200 group-hover:text-white line-clamp-1 leading-normal">
+                                        <h4 className="text-[11px] font-bold text-slate-200 group-hover:text-white line-clamp-1 leading-normal transition-colors">
                                           {item.name}
                                         </h4>
                                       </div>
 
                                       <div className="flex items-end justify-between mt-1">
                                         <div>
-                                          <span className="text-[10px] font-black text-white">₹{parseFloat(item.price).toLocaleString()}</span>
+                                          <span className="text-[12px] font-black text-white">₹{parseFloat(item.price).toLocaleString()}</span>
                                           {item.original_price && parseFloat(item.original_price) > parseFloat(item.price) && (
-                                            <span className="text-[8px] text-slate-500 line-through ml-1">
+                                            <span className="text-[9px] text-slate-500 line-through ml-1.5">
                                               ₹{parseFloat(item.original_price).toLocaleString()}
                                             </span>
                                           )}
                                         </div>
 
-                                        <span className={`text-[7px] font-black px-1.5 py-0.5 rounded-full border ${
+                                        <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border shadow-sm ${
                                           item.matchPct >= 90
-                                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25'
-                                            : 'bg-[var(--primary)]/10 text-[var(--primary)] border-[var(--primary)]/25'
+                                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.05)]'
+                                            : 'bg-[var(--primary)]/10 text-[var(--primary)] border-[var(--primary)]/20 shadow-[0_0_10px_color-mix(in srgb,var(--primary)_5%,transparent)]'
                                         }`}>
                                           {item.matchPct}% Match
                                         </span>
                                       </div>
+                                    </div>
+                                    {/* Hover Arrow Effect */}
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-4 transition-all duration-300 text-[var(--primary)] font-bold text-[14px]">
+                                      →
                                     </div>
                                   </div>
                                 );
@@ -937,14 +984,14 @@ const SearchOverlay = () => {
               )}
             </AnimatePresence>
 
-             {/* ── MAIN SEARCH BAR ── */}
-             <div className="p-3 pb-2">
-               <div className={`flex items-center rounded-2xl border overflow-visible transition-all duration-300 ${
-                 focused
-                   ? "border-[var(--primary)]/80 shadow-[0_0_20px_color-mix(in srgb,var(--primary)_25%,transparent),_0_0_0_3px_color-mix(in srgb,var(--primary)_15%,transparent)] bg-slate-950/40"
-                   : "border-white/[0.08]"
-               } bg-white/[0.04]`}>
- 
+            {/* ── MAIN SEARCH BAR ── */}
+            <div className="p-4 pb-3">
+              <div className={`flex items-center rounded-2xl border overflow-visible transition-all duration-300 relative ${
+                focused
+                  ? "border-[var(--primary)] shadow-[0_0_25px_rgba(99,102,241,0.25),_inset_0_1px_1px_rgba(255,255,255,0.1)] bg-slate-950/60"
+                  : "border-white/10 hover:border-white/15 bg-white/[0.02] shadow-[inset_0_1px_1px_rgba(255,255,255,0.01)]"
+              }`}>
+
                 {/* Search input */}
                 <input
                   ref={inputRef}
@@ -954,12 +1001,12 @@ const SearchOverlay = () => {
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                   onFocus={() => setFocused(true)}
                   onBlur={() => setTimeout(() => setFocused(false), 200)}
-                  placeholder={isListening ? "Listening (auto-detect language)..." : "Search for products, brands, or describe what you need..."}
-                  className="flex-1 px-4 h-11 bg-transparent outline-none text-white text-[12px] font-semibold placeholder:text-slate-500 placeholder:font-normal"
+                  placeholder={isListening ? "Listening (auto-detecting language)..." : "Search for products, brands, or describe what you need..."}
+                  className="flex-1 px-4 h-12 bg-transparent outline-none text-white text-[13px] font-semibold placeholder:text-slate-500 placeholder:font-normal"
                 />
 
                 {/* Right controls */}
-                <div className="flex items-center gap-1 px-2 shrink-0">
+                <div className="flex items-center gap-1.5 px-2 shrink-0">
                   {/* Clear */}
                   {searchQuery && (
                     <button
@@ -970,38 +1017,43 @@ const SearchOverlay = () => {
                     </button>
                   )}
 
+                  {/* Hotkey Hint */}
+                  <span className="hidden md:inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-white/5 text-slate-500 text-[8px] font-black border border-white/5 uppercase tracking-wider select-none pointer-events-none">
+                    Enter ↵
+                  </span>
+
                   {/* Voice Search (Auto-Language) */}
                   <button
                     onClick={handleVoiceSearch}
                     title="Voice Search (Auto-detect Language)"
-                    className={`p-2 h-8 rounded-xl transition-all duration-200 border border-white/[0.08] ${
+                    className={`p-2.5 h-9 rounded-xl transition-all duration-200 border border-white/[0.08] relative overflow-hidden ${
                       isListening
-                        ? "bg-red-500 text-white animate-pulse"
-                        : "text-slate-400 hover:text-[var(--primary)] hover:bg-[var(--primary)]/10"
+                        ? "bg-red-500 text-white animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)] border-red-400"
+                        : "text-slate-400 hover:text-[var(--primary)] hover:bg-[var(--primary)]/10 hover:border-[var(--primary)]/20"
                     }`}
                   >
-                    {isListening ? <MicOff size={13} /> : <Mic size={13} />}
+                    {isListening ? <MicOff size={14} /> : <Mic size={14} />}
                   </button>
- 
+
                   {/* Camera */}
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     title="Visual Product Search"
-                    className="p-2 h-8 rounded-xl text-slate-400 hover:text-[var(--primary)] hover:bg-[var(--primary)]/10 border border-white/[0.08] transition-all"
+                    className="p-2.5 h-9 rounded-xl text-slate-400 hover:text-[var(--primary)] hover:bg-[var(--primary)]/10 hover:border-[var(--primary)]/20 border border-white/[0.08] transition-all hover:scale-105"
                   >
-                    <Camera size={13} />
+                    <Camera size={14} />
                   </button>
- 
+
                   {/* Search button */}
                   <button
                     onClick={() => handleSearch()}
-                    className="px-3 h-8 bg-gradient-to-r from-[var(--primary)] to-[color-mix(in srgb,var(--primary)_80%,black)] hover:opacity-90 text-white rounded-xl text-[11px] font-black tracking-wider transition-all duration-200 shadow-lg shadow-[var(--primary)]/20 flex items-center gap-1.5 active:scale-95"
+                    className="px-4 h-9 bg-gradient-to-r from-[var(--primary)] via-indigo-600 to-indigo-600 hover:opacity-95 text-white rounded-xl text-[11px] font-black tracking-wider transition-all duration-300 shadow-md shadow-[var(--primary)]/20 flex items-center gap-1.5 active:scale-95 hover:-translate-y-0.5"
                   >
-                    <Search size={12} />
+                    <Search size={13} />
                     <span className="hidden sm:block">Search</span>
                   </button>
                 </div>
- 
+
                 <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageSearch} className="hidden" />
               </div>
             </div>
@@ -1013,7 +1065,7 @@ const SearchOverlay = () => {
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="mx-3 mb-2 px-4 py-2.5 bg-amber-500/8 border border-amber-500/20 rounded-xl flex items-center gap-2"
+                  className="mx-4 mb-3 px-4 py-2.5 bg-amber-500/10 border border-amber-500/20 shadow-[0_4px_15px_rgba(245,158,11,0.05)] rounded-2xl flex items-center gap-2"
                 >
                   <Zap size={11} className="text-amber-400 shrink-0" />
                   <span className="text-[10px] text-slate-300 font-semibold">
@@ -1030,7 +1082,7 @@ const SearchOverlay = () => {
                   >
                     {aliasHint || typoHint}
                   </button>
-                  <span className="text-[8px] text-slate-600 font-mono ml-1">
+                  <span className="text-[8px] text-slate-500 font-mono ml-1">
                     {aliasHint ? "(nickname resolved)" : "(auto-correct)"}
                   </span>
                 </motion.div>
@@ -1044,35 +1096,39 @@ const SearchOverlay = () => {
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="mx-3 mb-3 rounded-2xl overflow-hidden border border-white/10 bg-slate-950/90 backdrop-blur-xl shadow-2xl"
+                  className="mx-4 mb-4 rounded-2xl overflow-hidden border border-white/[0.08] bg-slate-950/80 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
                 >
                   {/* Tab selector */}
                   {searchQuery.length === 0 && (
-                    <div className="flex border-b border-white/[0.06]">
+                    <div className="flex p-1.5 bg-white/[0.02] border-b border-white/[0.06] gap-1.5">
                       {hasRecent && (
                         <button
                           onClick={() => setActiveTab("recent")}
-                          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[9px] font-black uppercase tracking-wider transition-all ${
-                            activeTab === "recent" ? "text-[var(--primary)] border-b-2 border-[var(--primary)] bg-white/[0.02]" : "text-slate-500 hover:text-slate-300"
+                          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${
+                            activeTab === "recent"
+                              ? "text-white bg-[var(--primary)] shadow-[0_4px_12px_color-mix(in srgb,var(--primary)_25%,transparent)]"
+                              : "text-slate-500 hover:text-slate-300 hover:bg-white/[0.02]"
                           }`}
                         >
-                          <Clock size={10} /> Recent Searches
+                          <Clock size={11} /> Recent Searches
                         </button>
                       )}
                       <button
                         onClick={() => setActiveTab("trending")}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[9px] font-black uppercase tracking-wider transition-all ${
-                          activeTab === "trending" ? "text-[var(--primary)] border-b-2 border-[var(--primary)] bg-white/[0.02]" : "text-slate-500 hover:text-slate-300"
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${
+                          activeTab === "trending"
+                            ? "text-white bg-[var(--primary)] shadow-[0_4px_12px_color-mix(in srgb,var(--primary)_25%,transparent)]"
+                            : "text-slate-500 hover:text-slate-300 hover:bg-white/[0.02]"
                         }`}
                       >
-                        <TrendingUp size={10} /> Trending
+                        <TrendingUp size={11} /> Trending Searches
                       </button>
                     </div>
                   )}
 
                   {/* Product suggestions */}
                   {searchQuery.length > 0 && hasSuggestions && (
-                    <div className="max-h-72 overflow-y-auto">
+                    <div className="max-h-72 overflow-y-auto scrollbar-futuristic">
                       {suggestions.map((product, i) => (
                         <button
                           key={product._id || product.id || i}
@@ -1084,19 +1140,19 @@ const SearchOverlay = () => {
                             dispatch(toggleSearchBar());
                             navigate(`/product/${product._id || product.id}`);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--primary)]/10 border-b border-white/[0.04] last:border-0 transition-all duration-150 group text-left"
+                          className="w-full flex items-center gap-3.5 px-4 py-3 hover:bg-[var(--primary)]/10 hover:border-l-2 hover:border-l-[var(--primary)] border-b border-white/[0.03] last:border-0 transition-all duration-200 group text-left"
                         >
                           {/* Product image */}
-                          <div className="w-9 h-9 rounded-xl overflow-hidden border border-white/10 bg-white/5 shrink-0 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 bg-white/5 shrink-0 flex items-center justify-center shadow-inner">
                             {getProductImage(product) ? (
-                              <img src={getProductImage(product)} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                              <img src={getProductImage(product)} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                             ) : (
                               <ShoppingBag size={14} className="text-slate-600" />
                             )}
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <p className="text-[11px] font-bold text-slate-200 group-hover:text-white truncate">{product.name}</p>
+                            <p className="text-[12px] font-bold text-slate-200 group-hover:text-white truncate transition-colors">{product.name}</p>
                             <div className="flex items-center gap-2 mt-0.5">
                               <span className="text-[9px] text-[var(--primary)]/70 font-semibold truncate">{product.category}</span>
                               {product.ratings && (
@@ -1109,9 +1165,9 @@ const SearchOverlay = () => {
 
                           <div className="shrink-0 text-right">
                             {product.price && (
-                              <p className="text-[11px] font-black text-emerald-400">₹{product.price.toLocaleString()}</p>
+                              <p className="text-[12px] font-black text-emerald-400">₹{product.price.toLocaleString()}</p>
                             )}
-                            <ArrowRight size={10} className="text-slate-600 group-hover:text-[var(--primary)] transition-colors ml-auto mt-0.5" />
+                            <ArrowRight size={10} className="text-slate-500 group-hover:text-[var(--primary)] group-hover:translate-x-0.5 transition-all ml-auto mt-0.5" />
                           </div>
                         </button>
                       ))}
@@ -1129,7 +1185,7 @@ const SearchOverlay = () => {
 
                   {/* Text-only suggestions fallback */}
                   {searchQuery.length > 0 && !hasSuggestions && (
-                    <div className="p-3 space-y-1">
+                    <div className="p-3 space-y-1 max-h-72 overflow-y-auto scrollbar-futuristic">
                       {[
                         searchQuery,
                         searchQuery + " under 1000",
@@ -1139,11 +1195,11 @@ const SearchOverlay = () => {
                         <button
                           key={i}
                           onClick={() => handleSearch(s)}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[11px] text-slate-400 hover:text-white hover:bg-white/5 transition-all font-semibold text-left"
+                          className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:translate-x-1 rounded-xl text-[11px] text-slate-400 hover:text-white hover:bg-white/5 transition-all font-semibold text-left group"
                         >
-                          <Search size={11} className="text-slate-600 shrink-0" />
+                          <Search size={11} className="text-slate-600 shrink-0 group-hover:text-[var(--primary)] transition-colors" />
                           {s}
-                          <ArrowRight size={10} className="ml-auto text-slate-700" />
+                          <ArrowRight size={10} className="ml-auto text-slate-700 group-hover:text-[var(--primary)] group-hover:translate-x-0.5 transition-all" />
                         </button>
                       ))}
                     </div>
@@ -1151,14 +1207,14 @@ const SearchOverlay = () => {
 
                   {/* Recent searches tab */}
                   {searchQuery.length === 0 && activeTab === "recent" && hasRecent && (
-                    <div className="p-2 space-y-0.5">
+                    <div className="p-2 space-y-0.5 max-h-72 overflow-y-auto scrollbar-futuristic">
                       {recentSearches.map((q, i) => (
                         <div key={i} className="flex items-center gap-2 group">
                           <button
                             onClick={() => handleSearch(q)}
-                            className="flex-1 flex items-center gap-2.5 px-3 py-2 rounded-xl text-[11px] text-slate-400 hover:text-white hover:bg-white/5 transition-all font-semibold text-left"
+                            className="flex-1 flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[11px] text-slate-400 hover:text-white hover:bg-white/5 transition-all font-semibold text-left group"
                           >
-                            <Clock size={11} className="text-slate-600 shrink-0" />
+                            <Clock size={11} className="text-slate-600 shrink-0 group-hover:text-[var(--primary)] transition-colors" />
                             {q}
                           </button>
                           <button
@@ -1166,7 +1222,7 @@ const SearchOverlay = () => {
                               deleteRecent(q);
                               setRecentSearches(getRecent());
                             }}
-                            className="p-1.5 text-slate-700 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 rounded-lg hover:bg-red-500/10"
+                            className="p-1.5 text-slate-700 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 rounded-lg hover:bg-red-500/10 mr-1.5"
                           >
                             <X size={10} />
                           </button>
@@ -1177,20 +1233,20 @@ const SearchOverlay = () => {
 
                   {/* Trending tab */}
                   {searchQuery.length === 0 && activeTab === "trending" && (
-                    <div className="p-2">
-                      <div className="grid grid-cols-2 gap-1">
+                    <div className="p-3">
+                      <div className="grid grid-cols-2 gap-1.5">
                         {TRENDING.map((item, i) => (
                           <button
                             key={i}
                             onClick={() => handleSearch(item.text)}
-                            className="flex items-center gap-2 px-3 py-2 rounded-xl text-left hover:bg-[var(--primary)]/10 border border-transparent hover:border-[var(--primary)]/20 transition-all duration-150 group"
+                            className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-left bg-slate-950/20 hover:bg-[var(--primary)]/10 border border-transparent hover:border-[var(--primary)]/20 transition-all duration-200 group"
                           >
-                            <span className="text-[9px] font-black text-slate-600 w-4 shrink-0">#{i + 1}</span>
-                            <div className="min-w-0">
-                              <p className="text-[10px] font-bold text-slate-300 group-hover:text-white truncate">{item.text}</p>
-                              <p className="text-[8px] text-[var(--primary)]/60 font-semibold">{item.cat}</p>
+                            <span className="text-[10px] font-black text-slate-600 w-4 shrink-0 transition-colors group-hover:text-[var(--primary)]">#{i + 1}</span>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-[11px] font-bold text-slate-300 group-hover:text-white truncate transition-colors">{item.text}</p>
+                              <p className="text-[8px] text-[var(--primary)]/60 font-semibold mt-0.5">{item.cat}</p>
                             </div>
-                            <TrendingUp size={9} className="text-slate-700 group-hover:text-[var(--primary)] ml-auto shrink-0" />
+                            <TrendingUp size={10} className="text-slate-700 group-hover:text-[var(--primary)] shrink-0 ml-auto" />
                           </button>
                         ))}
                       </div>
@@ -1199,7 +1255,7 @@ const SearchOverlay = () => {
 
                   {/* Search History Products Section */}
                   {searchQuery.length === 0 && recentProducts.length > 0 && (
-                    <div className="p-3 border-t border-white/[0.06] bg-white/[0.01]">
+                    <div className="p-3.5 border-t border-white/[0.06] bg-white/[0.01]">
                       <p className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-500 mb-2.5 flex items-center gap-1.5">
                         <Clock size={10} className="text-[var(--primary)]" /> Recent Products History
                       </p>
@@ -1213,9 +1269,9 @@ const SearchOverlay = () => {
                               dispatch(toggleSearchBar());
                               navigate(`/product/${prod._id || prod.id}`);
                             }}
-                            className="flex items-center gap-3 p-2 bg-white/[0.03] hover:bg-[var(--primary)]/10 border border-white/[0.06] hover:border-[var(--primary)]/30 rounded-xl transition-all duration-200 text-left group w-full"
+                            className="flex items-center gap-3 p-2 bg-slate-950/25 hover:bg-[var(--primary)]/10 border border-white/[0.04] hover:border-[var(--primary)]/30 rounded-xl transition-all duration-300 text-left group w-full hover:-translate-y-0.5 shadow-sm hover:shadow-[0_4px_10px_rgba(0,0,0,0.1)]"
                           >
-                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-white/5 shrink-0 flex items-center justify-center relative">
+                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-white/5 shrink-0 flex items-center justify-center relative shadow-inner">
                               {getProductImage(prod) ? (
                                 <img src={getProductImage(prod)} alt={prod.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                               ) : (
@@ -1223,7 +1279,7 @@ const SearchOverlay = () => {
                               )}
                             </div>
                             <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 h-12">
-                              <p className="text-[10px] font-bold text-slate-200 group-hover:text-white truncate w-full">{prod.name}</p>
+                              <p className="text-[10px] font-bold text-slate-200 group-hover:text-white truncate w-full transition-colors">{prod.name}</p>
                               <div className="flex items-center justify-between w-full mt-1">
                                 <span className="text-[8px] text-[var(--primary)]/70 font-semibold truncate max-w-[60%]">{prod.category}</span>
                                 <span className="text-[9px] font-black text-emerald-400">₹{prod.price?.toLocaleString()}</span>
@@ -1240,14 +1296,14 @@ const SearchOverlay = () => {
 
             {/* ── QUICK TAGS (shown when nothing typed) ── */}
             {!focused && !isScanning && (
-              <div className="px-3 pb-3">
+              <div className="px-4 pb-3.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[8px] font-black uppercase tracking-[0.15em] text-slate-600">Quick:</span>
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-600">Quick Tags:</span>
                   {["iPhone", "Saree", "Laptop", "Sneakers", "Earbuds", "Yoga Mat", "Kurti"].map((tag) => (
                     <button
                       key={tag}
                       onClick={() => { setSearchQuery(tag); handleSearch(tag); }}
-                      className="px-2.5 py-1 text-[9px] font-bold rounded-full border border-[var(--primary)]/20 text-[var(--primary)]/70 hover:border-[var(--primary)]/50 hover:text-[var(--primary)] hover:bg-[var(--primary)]/10 transition-all"
+                      className="px-3 py-1 text-[9px] font-black rounded-full border border-white/10 hover:border-[var(--primary)]/40 text-slate-400 hover:text-[var(--primary)] bg-white/[0.02] hover:bg-[var(--primary)]/10 hover:scale-105 hover:-translate-y-0.5 shadow-sm transition-all duration-200"
                     >
                       {tag}
                     </button>
@@ -1257,13 +1313,13 @@ const SearchOverlay = () => {
             )}
 
             {/* Bottom hint */}
-            <div className="px-4 pb-3 flex items-center justify-between">
-              <p className="text-[8px] text-slate-600 font-semibold flex items-center gap-1.5">
-                <Globe size={9} className="text-[var(--primary)]" />
+            <div className="px-5 pb-4.5 flex items-center justify-between border-t border-white/[0.04] pt-3.5 bg-slate-950/10">
+              <p className="text-[9px] text-slate-500 font-semibold flex items-center gap-2">
+                <Globe size={10} className="text-[var(--primary)]" />
                 Supports Hindi, English + 8 more languages · Nickname search enabled
               </p>
-              <p className="text-[8px] text-slate-700 font-mono">
-                Press <kbd className="px-1 py-0.5 bg-white/5 rounded text-slate-600 border border-white/10">Enter</kbd> to search
+              <p className="text-[8px] text-slate-600 font-mono flex items-center gap-1">
+                Press <kbd className="px-1.5 py-0.5 bg-white/5 rounded text-slate-400 border border-white/10 font-sans text-[8px] font-bold">Enter ↵</kbd> to search
               </p>
             </div>
           </div>
