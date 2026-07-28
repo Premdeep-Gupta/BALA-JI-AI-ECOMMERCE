@@ -1,0 +1,24 @@
+{
+  "watch": [
+    "app.js",
+    "server.js",
+    "Controllers",
+    "database",
+    "middlewares",
+    "models",
+    "router",
+    "utils"
+  ],
+  "ext": "js,json",
+  "ignore": [
+    "seed_*.js",
+    "delete_*.js",
+    "check_*.js",
+    "parse_*.js",
+    "test_*.js",
+    "update_*.js",
+    "*.log",
+    "node_modules",
+    "**/node_modules/**"
+  ]
+}
